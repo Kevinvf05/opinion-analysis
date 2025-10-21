@@ -6,27 +6,25 @@
 
 ![Diagrama ERD](./database_erd_diagram.png)
 
-> **Nota**: Si la imagen no se visualiza, abre el archivo [database_erd_diagram.png](./database_erd_diagram.png) directamente.
-
 ---
 
-## 🎯 Descripción General
+## Descripción General
 
 El sistema utiliza **PostgreSQL** como gestor de base de datos relacional, con 10 tablas principales que soportan:
 
-- ✅ Autenticación de 3 tipos de usuarios (estudiantes, profesores, coordinadores)
-- ✅ Gestión de materias y asignaciones profesor-materia por periodo
-- ✅ Encuestas de evaluación docente con 22 preguntas tipo Likert
-- ✅ Comentarios abiertos con análisis de sentimiento automático
-- ✅ Dashboards con estadísticas agregadas
-- ✅ Auditoría de acciones del sistema
-- ✅ Recuperación de contraseñas
+- Autenticación de 3 tipos de usuarios (estudiantes, profesores, coordinadores)
+-  Gestión de materias y asignaciones profesor-materia por periodo
+- Encuestas de evaluación docente con 22 preguntas tipo Likert
+- Comentarios abiertos con análisis de sentimiento automático
+- Dashboards con estadísticas agregadas
+- Auditoría de acciones del sistema
+- Recuperación de contraseñas
 
 ---
 
-## 📋 Tablas Principales
+## Tablas Principales
 
-### **1. USERS** 👥
+### **1. USERS** 
 Almacena todos los usuarios del sistema.
 
 | Campo | Tipo | Descripción |
@@ -47,7 +45,7 @@ Almacena todos los usuarios del sistema.
 
 ---
 
-### **2. SUBJECTS** 📚
+### **2. SUBJECTS** 
 Catálogo de materias de la universidad.
 
 | Campo | Tipo | Descripción |
@@ -61,7 +59,7 @@ Catálogo de materias de la universidad.
 
 ---
 
-### **3. TEACHER_SUBJECTS** 👨‍🏫📖
+### **3. TEACHER_SUBJECTS** 
 Asignación de profesores a materias por periodo académico.
 
 | Campo | Tipo | Descripción |
@@ -78,7 +76,7 @@ Asignación de profesores a materias por periodo académico.
 
 ---
 
-### **4. CATEGORIES** 📂
+### **4. CATEGORIES** 
 Las 7 dimensiones de evaluación docente.
 
 | Campo | Tipo | Descripción |
@@ -99,7 +97,7 @@ Las 7 dimensiones de evaluación docente.
 
 ---
 
-### **5. QUESTIONS** ❓
+### **5. QUESTIONS** 
 Las 22 preguntas de evaluación (escala Likert 1-5).
 
 | Campo | Tipo | Descripción |
@@ -120,7 +118,7 @@ Las 22 preguntas de evaluación (escala Likert 1-5).
 
 ---
 
-### **6. SURVEYS** 📝
+### **6. SURVEYS** 
 Encuestas completadas por estudiantes.
 
 | Campo | Tipo | Descripción |
@@ -138,7 +136,7 @@ Encuestas completadas por estudiantes.
 
 ---
 
-### **7. SURVEY_RESPONSES** ✅
+### **7. SURVEY_RESPONSES** 
 Respuestas individuales a cada pregunta.
 
 | Campo | Tipo | Descripción |
@@ -152,7 +150,7 @@ Respuestas individuales a cada pregunta.
 
 ---
 
-### **8. COMMENTS** 💬
+### **8. COMMENTS** 
 Comentarios abiertos con análisis de sentimiento.
 
 | Campo | Tipo | Descripción |
@@ -172,7 +170,7 @@ Comentarios abiertos con análisis de sentimiento.
 
 ---
 
-### **9. AUDIT_LOG** 📋
+### **9. AUDIT_LOG** 
 Registro de auditoría de acciones importantes.
 
 | Campo | Tipo | Descripción |
@@ -192,7 +190,7 @@ Registro de auditoría de acciones importantes.
 
 ---
 
-### **10. PASSWORD_RESET_TOKENS** 🔐
+### **10. PASSWORD_RESET_TOKENS** 
 Tokens para recuperación de contraseña.
 
 | Campo | Tipo | Descripción |
@@ -205,7 +203,7 @@ Tokens para recuperación de contraseña.
 
 ---
 
-## 🔍 Vistas (Views)
+## Vistas (Views)
 
 El sistema incluye 3 vistas para consultas comunes:
 
@@ -250,7 +248,7 @@ WHERE teacher_id = 2 AND semester_period = '2025-1';
 
 ---
 
-## ⚡ Triggers Automáticos
+## Triggers Automáticos
 
 ### **1. update_updated_at_column**
 Actualiza automáticamente el campo `updated_at` en la tabla `users`.
@@ -269,7 +267,7 @@ Ejemplo:
 
 ---
 
-## 🛠️ Instalación y Configuración
+## Instalación y Configuración
 
 ### **Requisitos:**
 - PostgreSQL 14+ instalado
@@ -315,7 +313,7 @@ psql -U postgres -d analisis_opinion -c "SELECT COUNT(*) FROM users;"
 
 ---
 
-## 📊 Consultas Útiles
+## Consultas Útiles
 
 ### **Ver todas las encuestas completas:**
 ```sql
@@ -366,7 +364,7 @@ ORDER BY cat.display_order;
 
 ---
 
-## 🔒 Seguridad
+## Seguridad
 
 ### **Contraseñas:**
 - Se usa **bcrypt** con salt para hashear contraseñas
@@ -382,7 +380,7 @@ ORDER BY cat.display_order;
 
 ---
 
-## 📚 Referencias
+## Referencias
 
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [Crow's Foot Notation](https://www.vertabelo.com/blog/crow-s-foot-notation/)
@@ -390,7 +388,7 @@ ORDER BY cat.display_order;
 
 ---
 
-## 👥 Autores
+##  Autores
 
 **Equipo 2 - Ingeniería de Software**
 - Luis Antonio Espín Acevedo
@@ -400,18 +398,18 @@ ORDER BY cat.display_order;
 
 ---
 
-## 📝 Changelog
+## Changelog
 
 ### [v1.0.0] - 2025-01-XX
-- ✅ Esquema inicial completo
-- ✅ 10 tablas principales
-- ✅ 3 vistas para estadísticas
-- ✅ 3 triggers automáticos
-- ✅ Datos de prueba incluidos
+- Esquema inicial completo
+- 10 tablas principales
+- 3 vistas para estadísticas
+- 3 triggers automáticos
+- Datos de prueba incluidos
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### **Problema: Error al ejecutar schema.sql**
 ```bash
@@ -432,6 +430,4 @@ GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO app_user;
 
 ---
 
-## 📞 Soporte
 
-Para dudas o problemas, contactar al equipo en: [Crear issue en GitHub](../../issues)
