@@ -1,70 +1,139 @@
-# Getting Started with Create React App
+# Sistema de Análisis de Opinión Docente
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Sistema para clasificar comentarios de evaluaciones docentes en categorías positivas, negativas y neutras.
 
-## Available Scripts
+## Equipo 2
+- **Luis Antonio Espín Acevedo**
+- **Kevin Vargas Flores**
+- **Anibal Medina Cabrera**
+- **Cristopher Axel Diaz Martinez**
 
-In the project directory, you can run:
+## Tecnologías
+- **Backend**: Python 
+- **Framework**: Flask
+- **Frontend**: React + Tailwind CSS
+- **Base de Datos**: PostgreSQL
+- **ML**: Transformers (HuggingFace)
 
-### `npm start`
+## Estructura del Proyecto
+```
+analisis-opinion/
+│
+├── backend/                          # Servidor Python
+│   ├── app/
+│   │   ├── __init__.py              # Inicialización de Flask
+│   │   ├── config.py                # Configuraciones (DB, secrets, etc.)
+│   │   ├── models/                  # Modelos de la BD
+│   │   │   ├── __init__.py
+│   │   │   ├── user.py              # Modelo Usuario
+│   │   │   ├── survey.py            # Modelo Encuesta
+│   │   │   ├── comment.py           # Modelo Comentario
+│   │   │   └── subject.py           # Modelo Materia
+│   │   ├── routes/                  # Endpoints de la API
+│   │   │   ├── __init__.py
+│   │   │   ├── auth.py              # Login, logout, recuperación
+│   │   │   ├── users.py             # Gestión de usuarios (RF-2)
+│   │   │   ├── surveys.py           # Encuestas (RF-3)
+│   │   │   ├── comments.py          # Búsqueda y filtrado (RF-5)
+│   │   │   └── dashboard.py         # Dashboards (RF-6)
+│   │   ├── services/                # Lógica de negocio
+│   │   │   ├── __init__.py
+│   │   │   ├── auth_service.py      # Autenticación
+│   │   │   ├── sentiment_service.py # Análisis de sentimientos (RF-4)
+│   │   │   └── report_service.py    # Generación de PDFs
+│   │   ├── utils/                   # Utilidades
+│   │   │   ├── __init__.py
+│   │   │   ├── validators.py        # Validaciones
+│   │   │   └── decorators.py        # Decoradores (ej: @login_required)
+│   │   └── tests/                   # Pruebas unitarias
+│   │       ├── test_auth.py
+│   │       ├── test_surveys.py
+│   │       └── test_sentiment.py
+│   ├── migrations/                  # Migraciones de BD (con Alembic)
+│   ├── requirements.txt             # Dependencias Python
+│   ├── .env.example                 # Variables de entorno (plantilla)
+│   └── run.py                       # Punto de entrada del servidor
+│
+├── frontend/                        # Cliente React
+│   ├── public/
+│   │   └── index.html
+│   ├── src/
+│   │   ├── components/              # Componentes reutilizables
+│   │   │   ├── common/              # Botones, inputs, modales
+│   │   │   │   ├── Button.jsx
+│   │   │   │   ├── Input.jsx
+│   │   │   │   └── Modal.jsx
+│   │   │   ├── layout/              # Header, Sidebar, Footer
+│   │   │   │   ├── Header.jsx
+│   │   │   │   └── Sidebar.jsx
+│   │   │   └── charts/              # Gráficas
+│   │   │       ├── BarChart.jsx
+│   │   │       └── PieChart.jsx
+│   │   ├── pages/                   # Páginas principales
+│   │   │   ├── auth/
+│   │   │   │   ├── Login.jsx
+│   │   │   │   └── RecoverPassword.jsx
+│   │   │   ├── student/
+│   │   │   │   └── SurveyForm.jsx   # HU-A-01, HU-A-02
+│   │   │   ├── teacher/
+│   │   │   │   ├── Dashboard.jsx    # HU-B-04
+│   │   │   │   └── Reviews.jsx      # HU-B-01
+│   │   │   └── coordinator/
+│   │   │       ├── Dashboard.jsx    # HU-C-02, HU-C-04
+│   │   │       ├── UserManagement.jsx # HU-C-01
+│   │   │       └── Reviews.jsx      # HU-C-06
+│   │   ├── services/                # Llamadas a la API
+│   │   │   ├── api.js               # Configuración base (axios)
+│   │   │   ├── authService.js
+│   │   │   ├── surveyService.js
+│   │   │   └── dashboardService.js
+│   │   ├── context/                 # Estado global (Context API)
+│   │   │   └── AuthContext.jsx      # Usuario autenticado
+│   │   ├── hooks/                   # Custom hooks
+│   │   │   └── useAuth.js
+│   │   ├── utils/                   # Utilidades
+│   │   │   └── formatters.js        # Formateo de fechas, números, etc.
+│   │   ├── App.jsx                  # Componente principal
+│   │   └── index.js                 # Punto de entrada
+│   ├── package.json                 # Dependencias Node
+│   └── tailwind.config.js           # Configuración de Tailwind
+│
+├── database/                        # Scripts de BD
+│   ├── schema.sql                   # Esquema inicial
+│   └── seed_data.sql                # Datos de prueba
+│
+├── docs/                            # Documentación
+│   ├── api_documentation.md         # Endpoints de la API
+│   ├── user_stories.md              # Tus HUs (ya las tienes)
+│   └── deployment_guide.md          # Guía de despliegue
+│
+├── docker-compose.yml               # Para correr todo con Docker
+├── .gitignore
+└── README.md                        # Instrucciones del proyecto
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Instalación
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### Backend
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
+pip install -r requirements.txt
+python run.py
+```
 
-### `npm test`
+### Frontend
+```bash
+cd frontend
+npm install
+npm run dev
+```
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Documentación
+- [Historias de Usuario](docs/user_stories.md)
+- [API Documentation](docs/api_documentation.md)
 
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Flujo de Trabajo Git
+Ver [CONTRIBUTING.md](CONTRIBUTING.md)
+>>>>>>> 4b50bf6d81209b20a30e81b868d1c696783bd561
