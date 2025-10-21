@@ -3,10 +3,10 @@
 Sistema para clasificar comentarios de evaluaciones docentes en categorías positivas, negativas y neutras.
 
 ## Equipo 2
-- Luis Antonio Espín Acevedo
-- Kevin Vargas Flores
-- Anibal Medina Cabrera
-- Cristopher Axel Diaz Martinez
+- **Luis Antonio Espín Acevedo**
+- **Kevin Vargas Flores**
+- **Anibal Medina Cabrera**
+- **Cristopher Axel Diaz Martinez**
 
 ## Tecnologías
 - **Backend**: Python 
