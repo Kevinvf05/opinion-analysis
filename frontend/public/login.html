@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión - UAEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md">
+        <!-- Logo and Back Button -->
+        <div class="mb-8 text-center">
+            <a href="index.html" class="inline-flex items-center text-white hover:text-purple-200 transition mb-6">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                </svg>
+                Volver al inicio
+            </a>
+            <div class="flex items-center justify-center space-x-3 mb-2">
+                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                <h1 class="text-3xl font-bold text-white">Análisis Docente</h1>
+            </div>
+            <p class="text-purple-100">Sistema de Opinión - UAEM</p>
+        </div>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-2xl p-8">
+            <h2 class="text-3xl font-bold text-gray-900 mb-2 text-center">Bienvenido</h2>
+            <p class="text-gray-600 mb-8 text-center">Inicia sesión para continuar</p>
+
+            <!-- Role Selection -->
+            <div class="mb-6">
+                <label class="block text-sm font-bold text-gray-700 mb-3">Soy:</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" onclick="selectRole('student')" id="btn-student" class="role-btn py-3 px-4 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:border-purple-500 hover:bg-purple-50 transition text-sm">
+                        Estudiante
+                    </button>
+                    <button type="button" onclick="selectRole('staff')" id="btn-staff" class="role-btn py-3 px-4 rounded-lg border-2 border-gray-300 text-gray-700 font-semibold hover:border-purple-500 hover:bg-purple-50 transition text-sm">
+                        Profesor/Admin
+                    </button>
+                </div>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <!-- Student Fields -->
+                <div id="studentFields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Matrícula</label>
+                        <input 
+                            type="text" 
+                            id="matricula" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                            placeholder="A01234567"
+                            pattern="[A-Za-z][0-9]{8}"
+                            maxlength="9"
+                        >
+                        <p class="text-xs text-gray-500 mt-1">Formato: 1 letra seguida de 8 dígitos</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Nombre Completo</label>
+                        <input 
+                            type="text" 
+                            id="studentName" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                            placeholder="Tu nombre completo"
+                        >
+                    </div>
+                </div>
+
+                <!-- Professor/Admin Fields -->
+                <div id="emailFields" class="hidden space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Email</label>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                            placeholder="tu.email@universidad.edu"
+                        >
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Contraseña</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                class="w-full px-4 py-3 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent" 
+                                placeholder="Tu contraseña"
+                            >
+                            <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                                <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="errorMessage" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    <strong>Error:</strong> <span id="errorText"></span>
+                </div>
+
+                <!-- Submit Button -->
+                <button 
+                    type="submit" 
+                    id="submitBtn"
+                    class="w-full gradient-bg text-white font-bold py-3 px-6 rounded-lg hover:shadow-xl hover:scale-105 transition-all mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    Iniciar Sesión
+                </button>
+            </form>
+
+            <!-- Help Text -->
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-600">
+                    ¿Problemas para iniciar sesión? 
+                    <a href="mailto:soporte.docente@uaem.edu.mx" class="text-purple-600 hover:text-purple-800 font-semibold">Contacta soporte</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="mt-6 text-center text-white text-sm">
+            <p>&copy; 2024 UAEM - Sistema de Análisis de Opinión Docente</p>
+        </div>
+    </div>
+
+    <script>
+        // API Configuration - Use relative URL when running through nginx proxy
+        const IS_PROXIED = window.location.port === '8080';
+        const API_BASE_URL = IS_PROXIED ? '/api' : 'http://localhost:5000/api';
+        
+        console.log('========== Login API Configuration ==========');
+        console.log('Current location:', window.location.href);
+        console.log('Is proxied:', IS_PROXIED);
+        console.log('API Base URL:', API_BASE_URL);
+        console.log('=============================================');
+        
+        let selectedRole = null;
+
+        function selectRole(role) {
+            selectedRole = role;
+            
+            // Update button styles
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('border-purple-600', 'bg-purple-100', 'text-purple-800');
+                btn.classList.add('border-gray-300', 'text-gray-700');
+            });
+            
+            const selectedBtn = document.getElementById(`btn-${role}`);
+            selectedBtn.classList.remove('border-gray-300', 'text-gray-700');
+            selectedBtn.classList.add('border-purple-600', 'bg-purple-100', 'text-purple-800');
+            
+            // Show appropriate fields
+            const studentFields = document.getElementById('studentFields');
+            const emailFields = document.getElementById('emailFields');
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (role === 'student') {
+                studentFields.classList.remove('hidden');
+                emailFields.classList.add('hidden');
+                document.getElementById('matricula').required = true;
+                document.getElementById('studentName').required = true;
+                document.getElementById('email').required = false;
+                document.getElementById('password').required = false;
+            } else {
+                studentFields.classList.add('hidden');
+                emailFields.classList.remove('hidden');
+                document.getElementById('matricula').required = false;
+                document.getElementById('studentName').required = false;
+                document.getElementById('email').required = true;
+                document.getElementById('password').required = true;
+            }
+            
+            // Enable submit button
+            submitBtn.disabled = false;
+            
+            // Hide error message
+            document.getElementById('errorMessage').classList.add('hidden');
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                `;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            errorText.textContent = message;
+            errorDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function showLoading(isLoading) {
+            const submitBtn = document.getElementById('submitBtn');
+            if (isLoading) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="flex items-center justify-center"><svg class="animate-spin h-5 w-5 mr-2" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" fill="none"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Iniciando sesión...</span>';
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Iniciar Sesión';
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            if (!selectedRole) {
+                showError('Por favor selecciona tu rol');
+                return;
+            }
+            
+            let loginData = { role: selectedRole };
+            
+            if (selectedRole === 'student') {
+                const matricula = document.getElementById('matricula').value;
+                const name = document.getElementById('studentName').value;
+                
+                // Validate matrícula format
+                const matriculaPattern = /^[A-Za-z][0-9]{8}$/;
+                if (!matriculaPattern.test(matricula)) {
+                    showError('La matrícula debe tener el formato: 1 letra seguida de 8 dígitos');
+                    return;
+                }
+                
+                // Remove special characters from name (accents, apostrophes, etc.)
+                const cleanName = name.replace(/[^\w\s]/g, '').trim();
+                
+                if (!cleanName) {
+                    showError('Por favor ingresa tu nombre completo');
+                    return;
+                }
+                
+                loginData.matricula = matricula.toUpperCase();
+                loginData.name = cleanName;
+                
+            } else {
+                // Staff login (Professor or Admin ONLY) with email and password
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
+                
+                // Validate email
+                const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailPattern.test(email)) {
+                    showError('Formato de email inválido');
+                    return;
+                }
+                
+                // Validate password (minimum requirement)
+                if (password.length < 6) {
+                    showError('La contraseña debe tener al menos 6 caracteres');
+                    return;
+                }
+                
+                loginData.email = email.toLowerCase();
+                loginData.password = password;
+            }
+            
+            // Call backend API
+            showLoading(true);
+            
+            try {
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                console.log('Login response:', response.ok, data);
+                
+                if (response.ok) {
+                    console.log('✅ LOGIN SUCCESSFUL!');
+                    console.log('Full response data:', JSON.stringify(data, null, 2));
+                    console.log('Token:', data.token);
+                    console.log('User object:', data.user);
+                    console.log('User role:', data.user ? data.user.role : 'UNDEFINED');
+                    console.log('Role type:', typeof(data.user?.role));
+                    
+                    // Store token and user data
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    
+                    console.log('localStorage SAVED:');
+                    console.log('  authToken:', localStorage.getItem('authToken'));
+                    console.log('  currentUser:', localStorage.getItem('currentUser'));
+                    
+                    // Redirect based on role (student, professor, admin ONLY)
+                    const role = data.user.role;
+                    
+                    console.log('========== REDIRECT LOGIC ==========');
+                    console.log('Role value:', role);
+                    console.log('Role === "student"?', role === 'student');
+                    console.log('Role === "professor"?', role === 'professor');
+                    console.log('Role === "admin"?', role === 'admin');
+                    console.log('====================================');
+                    
+                    // Add a delay to ensure localStorage is fully written and to see console
+                    setTimeout(() => {
+                        console.log('NOW REDIRECTING...');
+                        if (role === 'student') {
+                            console.log('→ Redirecting to /student-survey.html');
+                            window.location.href = '/student-survey.html';
+                        } else if (role === 'professor') {
+                            console.log('→ Redirecting to /preview/professor-dashboard.html');
+                            window.location.href = '/preview/professor-dashboard.html';
+                        } else if (role === 'admin') {
+                            console.log('→ Redirecting to /preview/admin-dashboard-preview.html');
+                            window.location.href = '/preview/admin-dashboard-preview.html';
+                        } else {
+                            console.log('❌ ROLE NOT RECOGNIZED:', role);
+                            showError('Rol de usuario no reconocido: ' + role);
+                        }
+                    }, 100);
+                } else {
+                    // Show error from backend
+                    showError(data.error || 'Error al iniciar sesión');
+                    showLoading(false);
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('Error de conexión. Verifica que el servidor esté activo.');
+                showLoading(false);
+            }
+        }
+    </script>
+</body>
+</html>

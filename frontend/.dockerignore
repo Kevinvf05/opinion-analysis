@@ -1,0 +1,30 @@
+# Node modules (if using npm later)
+node_modules/
+npm-debug.log*
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Documentation
+*.md
+README*
+
+# Temporary files
+*.tmp
+*.bak
+.cache/

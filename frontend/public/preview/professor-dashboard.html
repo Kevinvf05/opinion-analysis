@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Profesor - UAEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/professor-api.js"></script>
+    <style>
+        .btn-pastel-blue { background-color: #A8DADC; color: #1D3557; }
+        .btn-pastel-blue:hover { background-color: #8FC9CC; }
+        .btn-pastel-purple { background-color: #D4C5F9; color: #4A1A6C; }
+        .btn-pastel-purple:hover { background-color: #C3B0E8; }
+        .btn-pastel-red { background-color: #FFB5B5; color: #8B1E1E; }
+        .btn-pastel-red:hover { background-color: #FFA0A0; }
+    </style>
+</head>
+<body style="background-color: #89c2d9;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span id="professorName" class="text-xs sm:text-sm text-gray-600">Cargando...</span>
+                <button onclick="ProfessorAPI.logout()" class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="professor-dashboard.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="professor-subjects.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Mis Materias
+                </a>
+                <a href="professor-profile.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Mi Perfil
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 max-w-7xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Mi Panel Docente</h1>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- Total Subjects -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Mis Materias</h3>
+                        <p id="totalSubjects" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Groups -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Grupos</h3>
+                        <p id="totalGroups" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Students -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Estudiantes</h3>
+                        <p id="totalStudents" class="text-3xl font-bold text-gray-800 mt-2">0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Satisfaction Rate -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Satisfacción</h3>
+                        <p id="satisfactionRate" class="text-3xl font-bold text-gray-800 mt-2">0%</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Ratings Section -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow mb-8">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Calificaciones Generales</h2>
+            
+            <div class="flex flex-col lg:flex-row items-center justify-around gap-8">
+                <!-- Pie Chart -->
+                <div class="w-full lg:w-1/2">
+                    <canvas id="overallRatingsChart" class="max-w-full"></canvas>
+                </div>
+
+                <!-- Statistics -->
+                <div class="w-full lg:w-1/2">
+                    <h3 class="text-lg sm:text-xl font-semibold mb-4 text-gray-800">Resumen de Opiniones</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-green-700 font-semibold">Positivo:</span>
+                            </div>
+                            <span id="positiveCount" class="font-bold text-green-800 text-lg">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <span class="text-yellow-700 font-semibold">Neutral:</span>
+                            </div>
+                            <span id="neutralCount" class="font-bold text-yellow-800 text-lg">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <span class="text-red-700 font-semibold">Negativo:</span>
+                            </div>
+                            <span id="negativeCount" class="font-bold text-red-800 text-lg">0</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t-2 border-gray-200">
+                            <span class="font-semibold text-gray-700">Total Comentarios:</span>
+                            <span id="totalComments" class="font-bold text-gray-900 text-xl">0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subjects and Groups Section -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow mb-8">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Mis Materias y Grupos</h2>
+            
+            <div id="subjectsContainer" class="space-y-4">
+                <p class="text-center text-gray-500">Cargando materias...</p>
+            </div>
+        </div>
+
+        <!-- Recent Comments Section -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Comentarios Recientes</h2>
+            <div id="commentsContainer" class="space-y-3">
+                <p class="text-center text-gray-500">Cargando comentarios...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let overallRatingsChart = null;
+
+        // Load dashboard data on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Check authentication
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (!currentUser || currentUser.role !== 'professor') {
+                    console.error('Not authenticated as professor');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Update professor name in header
+                document.getElementById('professorName').textContent = `Profesor: ${currentUser.first_name} ${currentUser.last_name}`;
+
+                // Fetch dashboard data
+                const dashboardData = await ProfessorAPI.getDashboardStats();
+                
+                // Update stats cards
+                document.getElementById('totalSubjects').textContent = dashboardData.stats.total_subjects;
+                document.getElementById('totalGroups').textContent = dashboardData.stats.total_groups;
+                document.getElementById('totalStudents').textContent = dashboardData.stats.total_students;
+                document.getElementById('satisfactionRate').textContent = dashboardData.stats.satisfaction_rate + '%';
+
+                // Update sentiment counts
+                document.getElementById('positiveCount').textContent = dashboardData.sentiment.positive;
+                document.getElementById('neutralCount').textContent = dashboardData.sentiment.neutral;
+                document.getElementById('negativeCount').textContent = dashboardData.sentiment.negative;
+                document.getElementById('totalComments').textContent = dashboardData.sentiment.total;
+
+                // Initialize pie chart with real data
+                initializePieChart(dashboardData.sentiment);
+
+                // Load subjects (simplified preview)
+                await loadSubjectsPreview();
+
+                // Load recent comments
+                loadRecentComments(dashboardData.recent_comments);
+
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                alert('Error al cargar el dashboard. Por favor, intenta de nuevo.');
+            }
+        });
+
+        function initializePieChart(sentiment) {
+            const ctx = document.getElementById('overallRatingsChart').getContext('2d');
+            
+            // Destroy existing chart if it exists
+            if (overallRatingsChart) {
+                overallRatingsChart.destroy();
+            }
+
+            overallRatingsChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Positivo', 'Neutral', 'Negativo'],
+                    datasets: [{
+                        data: [sentiment.positive, sentiment.neutral, sentiment.negative],
+                        backgroundColor: [
+                            '#10B981', // Green
+                            '#F59E0B', // Yellow
+                            '#EF4444'  // Red
+                        ],
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    let value = context.parsed || 0;
+                                    let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                    return `${label}: ${value} (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        async function loadSubjectsPreview() {
+            try {
+                const subjectsData = await ProfessorAPI.getSubjects();
+                const container = document.getElementById('subjectsContainer');
+                
+                if (subjectsData.subjects.length === 0) {
+                    container.innerHTML = '<p class=\"text-center text-gray-500\">No hay materias asignadas.</p>';
+                    return;
+                }
+
+                // Show first 3 subjects as preview
+                const subjectsToShow = subjectsData.subjects.slice(0, 3);
+                
+                container.innerHTML = subjectsToShow.map((subject, index) => {
+                    const colors = ['purple', 'blue', 'green'];
+                    const color = colors[index % colors.length];
+                    
+                    return `
+                        <div class=\"border border-gray-200 rounded-lg p-4 hover:shadow-md transition\">
+                            <div class=\"flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-3\">
+                                <div>
+                                    <h3 class=\"text-lg font-bold text-gray-900\">${subject.name}</h3>
+                                    <p class=\"text-sm text-gray-600\">Código: ${subject.code}</p>
+                                </div>
+                                <div class=\"flex items-center space-x-2\">
+                                    <span class=\"px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold\">
+                                        ${subject.satisfaction}% Positivo
+                                    </span>
+                                </div>
+                            </div>
+                            <div class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3\">
+                                ${subject.groups.map(group => `
+                                    <div class=\"bg-${color}-50 p-3 rounded-lg\">
+                                        <p class=\"text-xs text-${color}-600 font-semibold mb-1\">${group.name}</p>
+                                        <p class=\"text-sm text-gray-700\">${group.students} estudiantes</p>
+                                        <p class=\"text-xs text-gray-500\">${group.schedule || 'Horario por definir'}</p>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+                // Add "View All" link if there are more subjects
+                if (subjectsData.subjects.length > 3) {
+                    container.innerHTML += `
+                        <div class=\"text-center mt-4\">
+                            <a href=\"professor-subjects.html\" class=\"text-blue-600 hover:text-blue-800 font-semibold\">
+                                Ver todas las materias (${subjectsData.subjects.length}) →
+                            </a>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                document.getElementById('subjectsContainer').innerHTML = '<p class=\"text-center text-red-500\">Error al cargar las materias.</p>';
+            }
+        }
+
+        function loadRecentComments(comments) {
+            const container = document.getElementById('commentsContainer');
+            
+            if (!comments || comments.length === 0) {
+                container.innerHTML = '<p class=\"text-center text-gray-500\">No hay comentarios recientes.</p>';
+                return;
+            }
+
+            container.innerHTML = comments.map(comment => {
+                const sentimentColors = {
+                    'positive': { bg: 'green-50', border: 'green-500', text: 'green-800', label: 'Positivo' },
+                    'neutral': { bg: 'yellow-50', border: 'yellow-500', text: 'yellow-800', label: 'Neutral' },
+                    'negative': { bg: 'red-50', border: 'red-500', text: 'red-800', label: 'Negativo' }
+                };
+                
+                const colors = sentimentColors[comment.sentiment] || sentimentColors['neutral'];
+                
+                return `
+                    <div class=\"p-4 bg-${colors.bg} border-l-4 border-${colors.border} rounded\">
+                        <div class=\"flex justify-between items-start mb-2\">
+                            <p class=\"text-sm font-semibold text-${colors.text}\">${colors.label} - ${comment.subject}</p>
+                            <span class=\"text-xs text-gray-500\">${comment.time_ago}</span>
+                        </div>
+                        <p class=\"text-sm text-gray-700 italic\">"${comment.text}"</p>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

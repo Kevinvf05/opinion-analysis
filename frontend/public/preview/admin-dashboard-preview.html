@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .btn-pastel-blue { background-color: #A8DADC; color: #1D3557; }
+        .btn-pastel-blue:hover { background-color: #8FC9CC; }
+        .btn-pastel-green { background-color: #B8E6B8; color: #2D5016; }
+        .btn-pastel-green:hover { background-color: #A0D9A0; }
+        .btn-pastel-purple { background-color: #D4C5F9; color: #4A1A6C; }
+        .btn-pastel-purple:hover { background-color: #C3B0E8; }
+        .btn-pastel-red { background-color: #FFB5B5; color: #8B1E1E; }
+        .btn-pastel-red:hover { background-color: #FFA0A0; }
+        .btn-pastel-yellow { background-color: #FFE4A0; color: #8B6914; }
+        .btn-pastel-yellow:hover { background-color: #FFD98F; }
+    </style>
+</head>
+<body style="background-color: #f3fbff;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span id="admin-name" class="text-xs sm:text-sm text-gray-600">Admin: Cargando...</span>
+                <button id="logout-btn" class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="admin-dashboard-preview.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="admin-users.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Gestionar Usuarios
+                </a>
+                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Profesores
+                </a>
+                <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Usuario
+                </a>
+                <a href="admin-create-subject.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Materia
+                </a>
+                <a href="admin-create-group.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Grupo
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 max-w-7xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">Panel de Administración</h1>
+
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <!-- Total Users -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Total Usuarios</h3>
+                        <p id="total-users" class="text-3xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Professors -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Profesores</h3>
+                        <p id="total-professors" class="text-3xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Students -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Estudiantes</h3>
+                        <p id="total-students" class="text-3xl font-bold text-gray-800 mt-2">-</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Participation Rate -->
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-gray-500 text-sm font-semibold">Participación</h3>
+                        <p id="participation-rate" class="text-3xl font-bold text-gray-800 mt-2">-%</p>
+                    </div>
+                    <div class="bg-yellow-100 p-3 rounded-full">
+                        <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Professor Ratings Section -->
+        <div class="bg-white p-4 sm:p-6 rounded-lg shadow mb-8">
+            <h2 class="text-xl sm:text-2xl font-bold mb-4 text-gray-800">Calificaciones por Profesor</h2>
+            
+            <!-- Professor Selector -->
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Seleccionar Profesor</label>
+                <select id="professorSelect" class="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base">
+                    <option value="">Cargando profesores...</option>
+                </select>
+            </div>
+
+            <!-- Chart and Stats Container -->
+            <div class="flex flex-col lg:flex-row items-center justify-around gap-8">
+                <!-- Pie Chart -->
+                <div class="w-full lg:w-1/2">
+                    <canvas id="ratingsChart" class="max-w-full"></canvas>
+                </div>
+
+                <!-- Statistics -->
+                <div class="w-full lg:w-1/2">
+                    <h3 id="selectedProfessorName" class="text-lg sm:text-xl font-semibold mb-4 text-gray-800">Seleccione un profesor</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-green-700 font-semibold">Positivo:</span>
+                            </div>
+                            <span id="positiveCount" class="font-bold text-green-800 text-lg">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-yellow-50 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                <span class="text-yellow-700 font-semibold">Neutral:</span>
+                            </div>
+                            <span id="neutralCount" class="font-bold text-yellow-800 text-lg">0</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                <span class="text-red-700 font-semibold">Negativo:</span>
+                            </div>
+                            <span id="negativeCount" class="font-bold text-red-800 text-lg">0</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-4 border-t-2 border-gray-200">
+                            <span class="font-semibold text-gray-700">Total Comentarios:</span>
+                            <span id="totalComments" class="font-bold text-gray-900 text-xl">0</span>
+                        </div>
+                        <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p id="satisfactionText" class="text-sm text-blue-800">
+                                <strong>Satisfacción:</strong> 0% de comentarios positivos
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <a href="admin-create-user.html" class="btn-pastel-pink font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center space-x-2 text-sm sm:text-base">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span>Crear Usuario</span>
+            </a>
+            <a href="admin-users.html" class="btn-pastel-green font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center space-x-2 text-sm sm:text-base">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                </svg>
+                <span>Gestionar Usuarios</span>
+            </a>
+            <a href="admin-professors.html" class="btn-pastel-purple font-bold py-3 sm:py-4 px-4 sm:px-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 flex items-center justify-center space-x-2 text-sm sm:text-base sm:col-span-2 lg:col-span-1">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                </svg>
+                <span>Editar Profesores</span>
+            </a>
+        </div>
+    </main>
+
+    <script>
+        // Initialize Pie Chart
+        const ctx = document.getElementById('ratingsChart').getContext('2d');
+        const ratingsChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Positivo', 'Neutral', 'Negativo'],
+                datasets: [{
+                    data: [0, 0, 0],  // Will be updated when professor is selected
+                    backgroundColor: [
+                        '#10B981', // Green
+                        '#F59E0B', // Yellow
+                        '#EF4444'  // Red
+                    ],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 14
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.label || '';
+                                let value = context.parsed || 0;
+                                let total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                let percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return `${label}: ${value} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Professor data - will be loaded from API
+        let professorsData = {};
+
+        // Update chart on professor selection
+        document.getElementById('professorSelect').addEventListener('change', function(e) {
+            const professorId = e.target.value;
+            
+            if (!professorId || !professorsData[professorId]) {
+                return;
+            }
+            
+            const data = professorsData[professorId];
+            
+            // Update chart
+            ratingsChart.data.datasets[0].data = data.ratings;
+            ratingsChart.update();
+            
+            // Update stats
+            const total = data.ratings.reduce((a, b) => a + b, 0);
+            const percentage = total > 0 ? ((data.ratings[0] / total) * 100).toFixed(1) : 0;
+            
+            document.getElementById('selectedProfessorName').textContent = data.name;
+            document.getElementById('positiveCount').textContent = data.ratings[0];
+            document.getElementById('neutralCount').textContent = data.ratings[1];
+            document.getElementById('negativeCount').textContent = data.ratings[2];
+            document.getElementById('totalComments').textContent = total;
+            document.getElementById('satisfactionText').innerHTML = `<strong>Satisfacción:</strong> ${percentage}% de comentarios positivos`;
+        });
+    </script>
+
+    <!-- Admin API Integration -->
+    <script src="/js/admin-api.js"></script>
+    
+    <script>
+        console.log('========================================');
+        console.log('Admin dashboard script starting...');
+
+        console.log('Current URL:', window.location.href);
+        console.log('========================================');
+        
+        // Load dashboard data on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            console.log('DOMContentLoaded event fired');
+            
+            // Check authentication
+            const token = localStorage.getItem('authToken');
+            const currentUserStr = localStorage.getItem('currentUser');
+            const currentUser = currentUserStr ? JSON.parse(currentUserStr) : null;
+            
+            console.log('=================== AUTH CHECK ===================');
+            console.log('Token exists:', !!token);
+            console.log('Token value (first 50 chars):', token ? token.substring(0, 50) + '...' : 'NULL');
+            console.log('currentUser exists:', !!currentUser);
+            console.log('currentUser value:', currentUser);
+            console.log('User role:', currentUser ? currentUser.role : 'NO USER');
+            console.log('==================================================');
+            
+            // If no token or user, redirect to login immediately
+            if (!token || !currentUser) {
+                console.error('❌ NO AUTH DATA FOUND - Redirecting to login...');
+                console.error('  Token:', !!token);
+                console.error('  User:', !!currentUser);
+                alert('No se encontró información de autenticación. Por favor, inicia sesión nuevamente.');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // If user is not admin, deny access
+            if (currentUser.role !== 'admin') {
+                console.error('❌ ACCESS DENIED - User is not admin');
+                console.error('  User role:', currentUser.role);
+                alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            // Set admin name
+            if (currentUser.full_name) {
+                document.getElementById('admin-name').textContent = `Admin: ${currentUser.full_name}`;
+            } else {
+                document.getElementById('admin-name').textContent = 'Admin: System Admin';
+            }
+            
+            try {
+                console.log('Starting to fetch dashboard data...');
+                
+                // Show loading state
+                document.getElementById('total-users').textContent = '...';
+                document.getElementById('total-professors').textContent = '...';
+                document.getElementById('total-students').textContent = '...';
+                document.getElementById('participation-rate').textContent = '...';
+
+                console.log('Calling getDashboardStats...');
+                // Fetch dashboard stats
+                const response = await getDashboardStats();
+                console.log('Dashboard stats response:', response);
+                
+                const stats = response.stats || response;
+                console.log('Stats object:', stats);
+                
+                if (stats) {
+                    // Update stat cards
+                    document.getElementById('total-users').textContent = stats.total_users || 0;
+                    document.getElementById('total-professors').textContent = stats.total_professors || 0;
+                    document.getElementById('total-students').textContent = stats.total_students || 0;
+                    
+                    // Calculate participation rate
+                    const participationRate = stats.total_students > 0 
+                        ? ((stats.total_surveys / stats.total_students) * 100).toFixed(1)
+                        : 0;
+                    document.getElementById('participation-rate').textContent = `${participationRate}%`;
+                }
+
+                // Load professors for the dropdown
+                console.log('Loading professors...');
+                const professorsResponse = await getAllProfessors();
+                console.log('Professors response:', professorsResponse);
+                
+                const professors = professorsResponse.professors || [];
+                console.log('Professors array:', professors);
+                
+                const professorSelect = document.getElementById('professorSelect');
+                professorSelect.innerHTML = '<option value="">Seleccione un profesor</option>';
+                
+                professors.forEach(prof => {
+                    const option = document.createElement('option');
+                    option.value = prof.id;
+                    option.textContent = `${prof.name} - ${prof.department || 'Sin departamento'}`;
+                    professorSelect.appendChild(option);
+                    
+                    // Store professor data for chart updates with actual sentiment data
+                    const sentiments = prof.sentiment_counts || { positive: 0, neutral: 0, negative: 0 };
+                    professorsData[prof.id] = {
+                        name: prof.name,
+                        ratings: [sentiments.positive, sentiments.neutral, sentiments.negative]
+                    };
+                    
+                    console.log(`Professor ${prof.id} (${prof.name}): ratings =`, [sentiments.positive, sentiments.neutral, sentiments.negative]);
+                });
+                
+                console.log('professorsData populated:', professorsData);
+                
+                // Select first professor by default if available
+                if (professors.length > 0) {
+                    const firstProfId = professors[0].id;
+                    professorSelect.value = firstProfId;
+                    
+                    // Trigger chart update for first professor
+                    const data = professorsData[firstProfId];
+                    if (data) {
+                        ratingsChart.data.datasets[0].data = data.ratings;
+                        ratingsChart.update();
+                        
+                        const total = data.ratings.reduce((a, b) => a + b, 0);
+                        const percentage = total > 0 ? ((data.ratings[0] / total) * 100).toFixed(1) : 0;
+                        
+                        document.getElementById('selectedProfessorName').textContent = data.name;
+                        document.getElementById('positiveCount').textContent = data.ratings[0];
+                        document.getElementById('neutralCount').textContent = data.ratings[1];
+                        document.getElementById('negativeCount').textContent = data.ratings[2];
+                        document.getElementById('totalComments').textContent = total;
+                        document.getElementById('satisfactionText').innerHTML = `<strong>Satisfacción:</strong> ${percentage}% de comentarios positivos`;
+                        
+                        console.log('Default professor chart loaded:', data.name, data.ratings);
+                    }
+                }
+
+            } catch (error) {
+                console.error('========== DASHBOARD ERROR ==========');
+                console.error('Error loading dashboard data:', error);
+                console.error('Error message:', error.message);
+                console.error('Error stack:', error.stack);
+                console.error('Error type:', error.constructor.name);
+                console.error('====================================');
+                
+                // Show error state
+                document.getElementById('total-users').textContent = 'Error';
+                document.getElementById('total-professors').textContent = 'Error';
+                document.getElementById('total-students').textContent = 'Error';
+                document.getElementById('participation-rate').textContent = 'Error';
+                
+                // Check if this is a network error
+                const isNetworkError = error.message === 'Failed to fetch' || error.name === 'TypeError';
+                
+                // Check if this is an authentication error
+                const is401Error = error.message && (error.message.includes('401') || error.message.includes('Unauthorized'));
+                
+                if (isNetworkError) {
+                    console.error('========== NETWORK ERROR ==========');
+                    console.error('Cannot connect to backend server!');
+                    console.error('Backend URL:', 'http://localhost:5000/api');
+                    console.error('===================================');
+                    
+                    alert('❌ No se puede conectar al servidor backend.\n\n' +
+                          'El backend no está respondiendo en http://localhost:5000\n\n' +
+                          'Por favor:\n' +
+                          '1. Verifica que Docker esté ejecutando el backend\n' +
+                          '2. Ejecuta: docker-compose up backend\n' +
+                          '3. O verifica que el backend esté corriendo manualmente\n\n' +
+                          'Revisa la consola del navegador para más detalles.');
+                    
+                    // Don't redirect on network error - let user fix the issue
+                    console.log('NOT redirecting to login - this is a network issue, not an auth issue');
+                    
+                } else if (is401Error) {
+                    console.error('========== 401 UNAUTHORIZED ERROR ==========');
+                    console.error('This means the backend rejected the token');
+                    console.error('Token used:', localStorage.getItem('authToken')?.substring(0, 50) + '...');
+                    console.error('Token length:', localStorage.getItem('authToken')?.length);
+                    console.error('Current user:', localStorage.getItem('currentUser'));
+                    console.error('============================================');
+                    
+                    alert('Tu sesión ha expirado o el token no es válido. Serás redirigido al login en 5 segundos.');
+                    
+                    setTimeout(() => {
+                        console.log('Redirecting to login after 5 seconds...');
+                        localStorage.removeItem('authToken');
+                        localStorage.removeItem('currentUser');
+                        window.location.href = '/login.html';
+                    }, 5000);
+                } else {
+                    console.error('⚠️ Unknown error occurred');
+                    console.error('The error is:', error.message);
+                    alert('Error al cargar el dashboard: ' + error.message + '\n\nRevisa la consola del navegador para más detalles.');
+                }
+            }
+        });
+
+        // Update logout button functionality
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('currentUser');
+                window.location.href = '/login.html';
+            });
+        }
+    </script>
+</body>
+</html>

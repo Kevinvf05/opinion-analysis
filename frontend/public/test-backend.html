@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Backend Connection Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6">
+        <h1 class="text-2xl font-bold mb-4">Backend Connection Test</h1>
+        
+        <div class="space-y-4">
+            <button onclick="testHealth()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Test Health Endpoint
+            </button>
+            
+            <button onclick="testLogin()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                Test Login Endpoint
+            </button>
+            
+            <button onclick="testDashboard()" class="bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded">
+                Test Dashboard Endpoint (with token)
+            </button>
+            
+            <button onclick="clearStorage()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                Clear LocalStorage
+            </button>
+        </div>
+        
+        <div class="mt-6">
+            <h2 class="text-xl font-bold mb-2">Results:</h2>
+            <pre id="results" class="bg-gray-900 text-green-400 p-4 rounded overflow-auto max-h-96"></pre>
+        </div>
+        
+        <div class="mt-4">
+            <h2 class="text-xl font-bold mb-2">LocalStorage:</h2>
+            <pre id="storage" class="bg-gray-100 p-4 rounded overflow-auto max-h-48"></pre>
+        </div>
+    </div>
+
+    <script>
+        // Use relative URL when running through nginx proxy
+        const IS_PROXIED = window.location.port === '8080';
+        const API_BASE = IS_PROXIED ? '/api' : 'http://localhost:5000/api';
+        
+        console.log('Test page loaded');
+        console.log('Is proxied:', IS_PROXIED);
+        console.log('API Base:', API_BASE);
+        
+        function log(message) {
+            const results = document.getElementById('results');
+            results.textContent += message + '\n';
+            console.log(message);
+        }
+        
+        function updateStorage() {
+            const storage = document.getElementById('storage');
+            storage.textContent = JSON.stringify({
+                authToken: localStorage.getItem('authToken')?.substring(0, 50) + '...',
+                currentUser: localStorage.getItem('currentUser')
+            }, null, 2);
+        }
+        
+        async function testHealth() {
+            document.getElementById('results').textContent = '';
+            log('=== Testing Health Endpoint ===');
+            log(`URL: ${API_BASE}/health`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                log(`Status: ${response.status} ${response.statusText}`);
+                
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+                log('✅ SUCCESS!');
+            } catch (error) {
+                log('❌ ERROR: ' + error.message);
+                log('Error type: ' + error.constructor.name);
+                log('');
+                log('This error means the browser cannot connect to the backend.');
+                log('Possible causes:');
+                log('  1. Backend not running');
+                log('  2. Browser security blocking the request');
+                log('  3. Network/firewall issue');
+            }
+        }
+        
+        async function testLogin() {
+            document.getElementById('results').textContent = '';
+            log('=== Testing Login Endpoint ===');
+            log(`URL: ${API_BASE}/auth/login`);
+            
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@uaem.mx',
+                        password: 'Admin123!'
+                    })
+                });
+                
+                log(`Status: ${response.status} ${response.statusText}`);
+                
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.token) {
+                    localStorage.setItem('authToken', data.token);
+                    localStorage.setItem('currentUser', JSON.stringify(data.user));
+                    log('✅ Token saved to localStorage!');
+                    updateStorage();
+                }
+            } catch (error) {
+                log('❌ ERROR: ' + error.message);
+                log('Error type: ' + error.constructor.name);
+            }
+        }
+        
+        async function testDashboard() {
+            document.getElementById('results').textContent = '';
+            log('=== Testing Dashboard Endpoint ===');
+            log(`URL: ${API_BASE}/admin/dashboard/stats`);
+            
+            const token = localStorage.getItem('authToken');
+            log('Token: ' + (token ? token.substring(0, 50) + '...' : 'NO TOKEN'));
+            
+            if (!token) {
+                log('❌ No token found! Run "Test Login" first.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/admin/dashboard/stats`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`Status: ${response.status} ${response.statusText}`);
+                
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+                log('✅ SUCCESS!');
+            } catch (error) {
+                log('❌ ERROR: ' + error.message);
+                log('Error type: ' + error.constructor.name);
+            }
+        }
+        
+        function clearStorage() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            log('LocalStorage cleared!');
+            updateStorage();
+        }
+        
+        // Initial storage display
+        updateStorage();
+    </script>
+</body>
+</html>

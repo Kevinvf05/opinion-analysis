@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Usuarios - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .btn-pastel-blue { background-color: #A8DADC; color: #1D3557; }
+        .btn-pastel-blue:hover { background-color: #8FC9CC; }
+        .btn-pastel-red { background-color: #FFB5B5; color: #8B1E1E; }
+        .btn-pastel-red:hover { background-color: #FFA0A0; }
+    </style>
+</head>
+<body style="background-color: #89c2d9;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-xs sm:text-sm text-gray-600">Admin: Juan Pérez</span>
+                <button class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="admin-dashboard-preview.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="admin-users.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold text-sm sm:text-base">
+                    Gestionar Usuarios
+                </a>
+                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition text-sm sm:text-base">
+                    Profesores
+                </a>
+                <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Usuario
+                </a>
+                <a href="admin-create-subject.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Materia
+                </a>
+                <a href="admin-create-group.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Grupo
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 w-full max-w-[1600px] mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Gestión de Usuarios</h1>
+
+        <!-- Filter Section -->
+        <div class="bg-white p-4 rounded-lg shadow mb-6">
+            <div class="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
+                <div class="w-full sm:w-auto">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Filtrar por rol</label>
+                    <select id="roleFilter" onchange="filterUsers()" class="w-full sm:w-auto px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="all">Todos</option>
+                        <option value="student">Estudiantes</option>
+                        <option value="professor">Profesores</option>
+                        <option value="admin">Administradores</option>
+                    </select>
+                </div>
+                <div class="flex-1 w-full sm:w-auto">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                    <input type="text" id="searchInput" onkeyup="filterUsers()" placeholder="Buscar por nombre o email..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Table -->
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell w-20">ID</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-auto">Nombre</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell w-auto">Email/Matrícula</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-32">Rol</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell w-32">Estado</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider w-48">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable" class="bg-white divide-y divide-gray-200">
+                        <!-- Users will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex flex-wrap justify-center mt-6 gap-2">
+            <button class="px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-100 transition text-sm">Anterior</button>
+            <button class="px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg shadow text-sm">1</button>
+            <button class="px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-100 transition text-sm">2</button>
+            <button class="px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-100 transition text-sm">3</button>
+            <button class="px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-100 transition text-sm">Siguiente</button>
+        </div>
+    </main>
+
+    <!-- Password Confirmation Modal for Admin Deletion -->
+    <div id="adminDeleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-6 sm:p-8 max-w-md w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-red-600">Confirmar Eliminación de Admin</h2>
+                <button onclick="closeAdminDeleteModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm text-yellow-700">
+                                <strong>Advertencia:</strong> Está a punto de eliminar una cuenta de administrador.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <p class="text-sm text-gray-600 mb-4" id="adminDeleteWarning">
+                    ¿Está seguro de que desea eliminar este administrador?
+                </p>
+
+                <div id="adminDeleteError" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    <strong>Error:</strong> <span id="adminDeleteErrorText"></span>
+                </div>
+            </div>
+
+            <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4">
+                <button onclick="closeAdminDeleteModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base">
+                    Cancelar
+                </button>
+                <button onclick="confirmAdminDeletion()" class="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base">
+                    Confirmar Eliminación
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include API files -->
+    <script src="/js/user-management-api.js"></script>
+    
+    <script>
+        // Users array - will be loaded from backend
+        let users = [];
+        let userToDelete = null;
+
+        const roleColors = {
+            student: 'bg-blue-100 text-blue-800',
+            professor: 'bg-purple-100 text-purple-800',
+            admin: 'bg-red-100 text-red-800'
+        };
+
+        const roleNames = {
+            student: 'Estudiante',
+            professor: 'Profesor',
+            admin: 'Administrador'
+        };
+
+        // Load users from backend
+        async function loadUsersFromBackend() {
+            try {
+                const roleFilter = document.getElementById('roleFilter').value;
+                const searchTerm = document.getElementById('searchInput').value;
+                
+                const response = await getAllUsers(roleFilter, searchTerm);
+                users = response.users || [];
+                
+                loadUsers(users);
+            } catch (error) {
+                console.error('Error loading users:', error);
+                alert('Error al cargar usuarios: ' + error.message);
+            }
+        }
+
+        function loadUsers(filteredUsers = users) {
+            const tbody = document.getElementById('usersTable');
+            tbody.innerHTML = '';
+
+            if (filteredUsers.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                            No se encontraron usuarios
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            filteredUsers.forEach(user => {
+                const isAdmin = user.role === 'admin';
+                const adminCount = users.filter(u => u.role === 'admin').length;
+                const cannotDelete = isAdmin && adminCount <= 1;
+                
+                const displayName = `${user.first_name} ${user.last_name}`;
+                const identifier = user.email || user.matricula || 'N/A';
+                
+                const row = `
+                    <tr class="hover:bg-gray-50">
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden md:table-cell">${user.id}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <div class="text-sm font-medium text-gray-900">${displayName}</div>
+                            <div class="text-xs text-gray-500 lg:hidden">${identifier}</div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 hidden lg:table-cell">${identifier}</td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                            <span class="px-3 py-1 text-sm rounded-full ${roleColors[user.role]}">${roleNames[user.role]}</span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                            <span class="px-3 py-1 text-sm rounded-full ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}">
+                                ${user.is_active ? 'Activo' : 'Inactivo'}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm space-x-3">
+                            <button onclick="editUser(${user.id})" class="text-blue-600 hover:text-blue-900 font-semibold">Editar</button>
+                            <button onclick="toggleStatus(${user.id})" class="text-yellow-600 hover:text-yellow-900 font-semibold hidden sm:inline">${user.is_active ? 'Desactivar' : 'Activar'}</button>
+                            ${cannotDelete ? 
+                                `<button class="text-gray-400 font-semibold cursor-not-allowed" title="Debe haber al menos un administrador activo">Eliminar</button>` :
+                                `<button onclick="deleteUserConfirm(${user.id})" class="text-red-600 hover:text-red-900 font-semibold">Eliminar</button>`
+                            }
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        async function filterUsers() {
+            await loadUsersFromBackend();
+        }
+
+        function editUser(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+            
+            // For now, just show an alert
+            // In a real app, you'd open a modal with a form
+            alert(`Editar usuario ID: ${id}\nNombre: ${user.first_name} ${user.last_name}\n\n(Funcionalidad de edición completa próximamente)`);
+        }
+
+        async function toggleStatus(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+            
+            try {
+                // Check if trying to deactivate the last active admin
+                if (user.role === 'admin' && user.is_active) {
+                    const activeAdmins = users.filter(u => u.role === 'admin' && u.is_active).length;
+                    if (activeAdmins <= 1) {
+                        alert('No se puede desactivar al único administrador activo del sistema.');
+                        return;
+                    }
+                }
+                
+                // Toggle status via API
+                await toggleUserStatus(id, user.is_active);
+                
+                // Reload users
+                await loadUsersFromBackend();
+                
+                alert(`Usuario ${!user.is_active ? 'activado' : 'desactivado'} exitosamente`);
+                
+            } catch (error) {
+                console.error('Error toggling status:', error);
+                alert('Error al cambiar el estado: ' + error.message);
+            }
+        }
+
+        async function confirmAdminDeletion() {
+            const errorDiv = document.getElementById('adminDeleteError');
+            const errorText = document.getElementById('adminDeleteErrorText');
+
+            try {
+                // Delete user via API
+                await deleteUser(userToDelete);
+                
+                // Close modal and reload users
+                closeAdminDeleteModal();
+                await loadUsersFromBackend();
+                
+                alert('Administrador eliminado exitosamente');
+                
+            } catch (error) {
+                console.error('Error deleting admin:', error);
+                errorText.textContent = error.message;
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function deleteUserConfirm(id) {
+            const user = users.find(u => u.id === id);
+            if (!user) return;
+
+            // Check if user is an admin
+            if (user.role === 'admin') {
+                const adminCount = users.filter(u => u.role === 'admin').length;
+                
+                // Check if there's at least one other admin
+                if (adminCount <= 1) {
+                    alert('No se puede eliminar al único administrador del sistema. Debe haber al menos un administrador activo.');
+                    return;
+                }
+                
+                // Show confirmation modal for admin deletion
+                userToDelete = id;
+                document.getElementById('adminDeleteWarning').textContent = 
+                    `¿Está seguro de que desea eliminar al administrador ${user.first_name} ${user.last_name}?`;
+                document.getElementById('adminDeleteModal').classList.remove('hidden');
+                document.getElementById('adminDeleteError').classList.add('hidden');
+            } else {
+                // Non-admin users can be deleted with simple confirmation
+                if (confirm(`¿Está seguro de eliminar a ${user.first_name} ${user.last_name}?`)) {
+                    deleteUserNow(id);
+                }
+            }
+        }
+
+        async function deleteUserNow(id) {
+            try {
+                await deleteUser(id);
+                await loadUsersFromBackend();
+                alert('Usuario eliminado exitosamente');
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Error al eliminar usuario: ' + error.message);
+            }
+        }
+
+        function closeAdminDeleteModal() {
+            document.getElementById('adminDeleteModal').classList.add('hidden');
+            userToDelete = null;
+        }
+
+        // Check auth and load users on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const token = localStorage.getItem('authToken');
+            const currentUserStr = localStorage.getItem('currentUser');
+            
+            if (!token || !currentUserStr) {
+                alert('No se encontró información de autenticación. Por favor, inicia sesión nuevamente.');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const currentUser = JSON.parse(currentUserStr);
+                
+                if (currentUser.role !== 'admin') {
+                    alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                // Load users from backend
+                await loadUsersFromBackend();
+                
+            } catch (error) {
+                console.error('Error loading page:', error);
+                alert('Error al cargar la página: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

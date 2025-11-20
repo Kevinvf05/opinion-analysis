@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Profesor UAEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/professor-api.js"></script>
+    <style>
+        .btn-pastel-blue { background-color: #A8DADC; color: #1D3557; }
+        .btn-pastel-blue:hover { background-color: #8FC9CC; }
+        .btn-pastel-gray { background-color: #E0E0E0; color: #4A4A4A; }
+        .btn-pastel-gray:hover { background-color: #D0D0D0; }
+        .btn-pastel-red { background-color: #FFB5B5; color: #8B1E1E; }
+        .btn-pastel-red:hover { background-color: #FFA0A0; }
+    </style>
+</head>
+<body style="background-color: #89c2d9;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span id="professorName" class="text-xs sm:text-sm text-gray-600">Cargando...</span>
+                <button onclick="logout()" class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="professor-dashboard.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="professor-subjects.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Mis Materias
+                </a>
+                <a href="professor-profile.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Mi Perfil
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 max-w-5xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Mi Perfil</h1>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="text-center mb-6">
+                        <div id="professorInitials" class="w-32 h-32 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto flex items-center justify-center text-white text-4xl font-bold mb-4">
+                            --
+                        </div>
+                        <h2 id="professorFullName" class="text-2xl font-bold text-gray-900">Cargando...</h2>
+                        <p class="text-gray-600">Profesor</p>
+                        <p id="professorEmail" class="text-sm text-gray-500 mt-2">-</p>
+                    </div>
+
+                    <div class="space-y-3 text-sm">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong id="totalSubjects">0</strong> Materias</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong id="totalGroups">0</strong> Grupos</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong id="totalStudents">0</strong> Estudiantes</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-green-50 rounded-lg">
+                            <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <span class="text-gray-700"><strong id="satisfactionRate">0</strong>% Satisfacción</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profile Information -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Personal Information -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Información Personal</h3>
+                        <button onclick="toggleEdit('personal')" id="editPersonalBtn" class="btn-pastel-blue px-4 py-2 rounded font-semibold text-sm">
+                            Editar
+                        </button>
+                    </div>
+
+                    <form id="personalForm" onsubmit="savePersonalInfo(event)">
+                        <div id="profileMessages"></div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Nombre</label>
+                                <input type="text" id="firstName" name="first_name" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Apellido</label>
+                                <input type="text" id="lastName" name="last_name" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100" required>
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Email (no editable)</label>
+                                <input type="email" id="email" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Teléfono</label>
+                                <input type="tel" id="phone" name="phone" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Departamento</label>
+                                <input type="text" id="department" name="department" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Oficina</label>
+                                <input type="text" id="office" name="office" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Especialización</label>
+                                <input type="text" id="specialization" name="specialization" disabled class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100">
+                            </div>
+                        </div>
+
+                        <div id="personalFormButtons" class="hidden mt-6 flex space-x-3">
+                            <button type="button" onclick="cancelEdit('personal')" class="flex-1 btn-pastel-gray py-2 px-4 rounded font-semibold">
+                                Cancelar
+                            </button>
+                            <button type="submit" class="flex-1 btn-pastel-blue py-2 px-4 rounded font-semibold">
+                                Guardar Cambios
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Change Password -->
+                <div class="bg-white rounded-lg shadow-lg p-6">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Cambiar Contraseña</h3>
+
+                    <form id="passwordForm" onsubmit="changePassword(event)">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Contraseña Actual</label>
+                                <div class="relative">
+                                    <input type="password" id="currentPassword" required class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <button type="button" onclick="togglePasswordVisibility('currentPassword', 'eyeIcon1')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                        <svg id="eyeIcon1" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Nueva Contraseña</label>
+                                <div class="relative">
+                                    <input type="password" id="newPassword" required minlength="8" class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <button type="button" onclick="togglePasswordVisibility('newPassword', 'eyeIcon2')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                        <svg id="eyeIcon2" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">Confirmar Nueva Contraseña</label>
+                                <div class="relative">
+                                    <input type="password" id="confirmPassword" required minlength="8" class="w-full px-4 py-2 pr-12 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                                    <button type="button" onclick="togglePasswordVisibility('confirmPassword', 'eyeIcon3')" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                                        <svg id="eyeIcon3" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="passwordError" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm"></div>
+                        <div id="passwordSuccess" class="hidden mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded-lg text-sm"></div>
+
+                        <button type="submit" class="mt-6 w-full btn-pastel-blue py-3 px-4 rounded font-semibold">
+                            Cambiar Contraseña
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let originalProfileData = {};
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
+        // Load profile on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Check authentication
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (!currentUser || currentUser.role !== 'professor') {
+                    console.error('Not authenticated as professor');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Update professor name in header
+                document.getElementById('professorName').textContent = `Profesor: ${currentUser.first_name} ${currentUser.last_name}`;
+
+                // Fetch profile data
+                const profileData = await ProfessorAPI.getProfile();
+                console.log('Profile data loaded:', profileData);
+                
+                // Store original data for cancel
+                originalProfileData = { ...profileData.profile };
+                
+                // Update UI with profile data
+                updateProfileUI(profileData);
+
+            } catch (error) {
+                console.error('Error loading profile:', error);
+                alert('Error al cargar el perfil. Por favor, intenta de nuevo.');
+            }
+        });
+
+        function updateProfileUI(data) {
+            const profile = data.profile;
+            const stats = data.stats;
+
+            // Update profile card
+            document.getElementById('professorInitials').textContent = profile.initials;
+            document.getElementById('professorFullName').textContent = `${profile.first_name} ${profile.last_name}`;
+            document.getElementById('professorEmail').textContent = profile.email;
+
+            // Update stats
+            document.getElementById('totalSubjects').textContent = stats.total_subjects;
+            document.getElementById('totalGroups').textContent = stats.total_groups;
+            document.getElementById('totalStudents').textContent = stats.total_students;
+            document.getElementById('satisfactionRate').textContent = stats.satisfaction_rate;
+
+            // Update form inputs
+            document.getElementById('firstName').value = profile.first_name;
+            document.getElementById('lastName').value = profile.last_name;
+            document.getElementById('email').value = profile.email;
+            document.getElementById('phone').value = profile.phone || '';
+            document.getElementById('department').value = profile.department || '';
+            document.getElementById('office').value = profile.office || '';
+            document.getElementById('specialization').value = profile.specialization || '';
+        }
+
+        function toggleEdit(section) {
+            if (section === 'personal') {
+                const form = document.getElementById('personalForm');
+                const inputs = form.querySelectorAll('input:not(#email)');
+                const buttons = document.getElementById('personalFormButtons');
+                const editBtn = document.getElementById('editPersonalBtn');
+                
+                const isCurrentlyDisabled = inputs[0].disabled;
+                
+                inputs.forEach(input => input.disabled = !isCurrentlyDisabled);
+                buttons.classList.toggle('hidden');
+                editBtn.classList.toggle('hidden');
+            }
+        }
+
+        function cancelEdit(section) {
+            if (section === 'personal') {
+                // Restore original values
+                document.getElementById('firstName').value = originalProfileData.first_name;
+                document.getElementById('lastName').value = originalProfileData.last_name;
+                document.getElementById('phone').value = originalProfileData.phone || '';
+                document.getElementById('department').value = originalProfileData.department || '';
+                document.getElementById('office').value = originalProfileData.office || '';
+                document.getElementById('specialization').value = originalProfileData.specialization || '';
+                
+                toggleEdit('personal');
+                document.getElementById('profileMessages').innerHTML = '';
+            }
+        }
+
+        async function savePersonalInfo(event) {
+            event.preventDefault();
+            
+            const messageDiv = document.getElementById('profileMessages');
+            messageDiv.innerHTML = '';
+            
+            try {
+                const formData = {
+                    first_name: document.getElementById('firstName').value,
+                    last_name: document.getElementById('lastName').value,
+                    phone: document.getElementById('phone').value,
+                    department: document.getElementById('department').value,
+                    office: document.getElementById('office').value,
+                    specialization: document.getElementById('specialization').value
+                };
+
+                console.log('Updating profile with:', formData);
+                
+                const result = await ProfessorAPI.updateProfile(formData);
+                console.log('Profile updated:', result);
+                
+                // Update original data
+                originalProfileData = { ...result.profile };
+                
+                // Update UI
+                document.getElementById('professorFullName').textContent = `${result.profile.first_name} ${result.profile.last_name}`;
+                document.getElementById('professorInitials').textContent = `${result.profile.first_name[0]}${result.profile.last_name[0]}`.toUpperCase();
+                
+                // Update current user in localStorage
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                currentUser.first_name = result.profile.first_name;
+                currentUser.last_name = result.profile.last_name;
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                document.getElementById('professorName').textContent = `Profesor: ${currentUser.first_name} ${currentUser.last_name}`;
+                
+                messageDiv.innerHTML = '<div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded-lg">✓ Perfil actualizado exitosamente</div>';
+                toggleEdit('personal');
+                
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error updating profile:', error);
+                messageDiv.innerHTML = '<div class="mb-4 p-3 bg-red-50 border border-red-200 text-red-800 rounded-lg">Error al actualizar el perfil: ' + (error.message || 'Error desconocido') + '</div>';
+            }
+        }
+
+        function togglePasswordVisibility(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                `;
+            } else {
+                input.type = 'password';
+                icon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                `;
+            }
+        }
+
+        async function changePassword(event) {
+            event.preventDefault();
+            
+            const currentPassword = document.getElementById('currentPassword').value;
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            const errorDiv = document.getElementById('passwordError');
+            const successDiv = document.getElementById('passwordSuccess');
+            
+            errorDiv.classList.add('hidden');
+            successDiv.classList.add('hidden');
+            
+            if (newPassword !== confirmPassword) {
+                errorDiv.textContent = 'Las contraseñas no coinciden';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            if (newPassword.length < 8) {
+                errorDiv.textContent = 'La contraseña debe tener al menos 8 caracteres';
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+            
+            try {
+                console.log('Changing password...');
+                
+                const result = await ProfessorAPI.changePassword({
+                    current_password: currentPassword,
+                    new_password: newPassword
+                });
+                
+                console.log('Password changed:', result);
+                
+                successDiv.textContent = '✓ Contraseña cambiada exitosamente';
+                successDiv.classList.remove('hidden');
+                document.getElementById('passwordForm').reset();
+                
+                setTimeout(() => {
+                    successDiv.classList.add('hidden');
+                }, 3000);
+                
+            } catch (error) {
+                console.error('Error changing password:', error);
+                errorDiv.textContent = error.message || 'Error al cambiar la contraseña';
+                errorDiv.classList.remove('hidden');
+            }
+        }
+    </script>
+            
+            setTimeout(() => {
+                successDiv.classList.add('hidden');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

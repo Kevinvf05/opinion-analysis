@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Grupo - Admin UAEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="../js/admin-api.js?v=2"></script>
+    <style>
+        .btn-pastel-blue { background-color: #A8DADC; color: #1D3557; }
+        .btn-pastel-blue:hover { background-color: #8FC9CC; }
+        .btn-pastel-gray { background-color: #E0E0E0; color: #4A4A4A; }
+        .btn-pastel-gray:hover { background-color: #D0D0D0; }
+        .btn-pastel-red { background-color: #FFB5B5; color: #8B1E1E; }
+        .btn-pastel-red:hover { background-color: #FFA0A0; }
+    </style>
+</head>
+<body style="background-color: #f3fbff;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span id="adminName" class="text-xs sm:text-sm text-gray-600">Admin: Cargando...</span>
+                <button onclick="logout()" class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="admin-dashboard-preview.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="admin-users.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Gestionar Usuarios
+                </a>
+                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Profesores
+                </a>
+                <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Usuario
+                </a>
+                <a href="admin-create-subject.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Materia
+                </a>
+                <a href="admin-create-group.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Crear Grupo
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 max-w-4xl mx-auto">
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">Crear Nuevo Grupo</h1>
+
+        <!-- Form Card -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div id="messageContainer"></div>
+
+            <form id="createGroupForm" onsubmit="createGroup(event)">
+                <div class="space-y-4">
+                    <!-- Subject -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Materia *</label>
+                        <select id="subject_id" name="subject_id" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccionar materia...</option>
+                        </select>
+                    </div>
+
+                    <!-- Professor -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Profesor *</label>
+                        <select id="professor_id" name="professor_id" required
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccionar profesor...</option>
+                        </select>
+                    </div>
+
+                    <!-- Group Name -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Nombre del Grupo *</label>
+                        <input type="text" id="group_name" name="group_name" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: Grupo A, Grupo B, 101">
+                        <p class="text-xs text-gray-500 mt-1">Identificador del grupo (A, B, 101, etc.)</p>
+                    </div>
+
+                    <!-- Semester Period -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Periodo Semestral *</label>
+                        <input type="text" id="semester_period" name="semester_period" required 
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: 2024-1, 2024-2">
+                        <p class="text-xs text-gray-500 mt-1">Formato: YYYY-N (ejemplo: 2024-1)</p>
+                    </div>
+
+                    <!-- Schedule -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Horario (opcional)</label>
+                        <input type="text" id="schedule" name="schedule"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: Lunes y Miércoles 10:00-12:00">
+                    </div>
+
+                    <!-- Classroom -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Aula (opcional)</label>
+                        <input type="text" id="classroom" name="classroom"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: Edificio A-101">
+                    </div>
+
+                    <!-- Current Students -->
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">Estudiantes Actuales</label>
+                        <input type="number" id="current_students" name="current_students" min="0" value="0"
+                               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                        <p class="text-xs text-gray-500 mt-1">Número actual de estudiantes inscritos</p>
+                    </div>
+
+                    <!-- Active Status -->
+                    <div class="flex items-center">
+                        <input type="checkbox" id="is_active" name="is_active" checked
+                               class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                        <label for="is_active" class="ml-2 text-sm font-bold text-gray-700">Grupo activo</label>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="mt-6 flex flex-col sm:flex-row gap-3">
+                    <button type="button" onclick="window.location.href='admin-dashboard-preview.html'" 
+                            class="flex-1 btn-pastel-gray py-3 px-4 rounded font-semibold">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 btn-pastel-blue py-3 px-4 rounded font-semibold">
+                        Crear Grupo
+                    </button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let subjects = [];
+        let professors = [];
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
+        // Load page data
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Check authentication
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                if (!currentUser || currentUser.role !== 'admin') {
+                    console.error('Not authenticated as admin');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Update admin name in header
+                document.getElementById('adminName').textContent = `Admin: ${currentUser.first_name} ${currentUser.last_name}`;
+
+                // Load subjects and professors for dropdowns
+                await loadSubjects();
+                await loadProfessors();
+
+            } catch (error) {
+                console.error('Error loading page:', error);
+                showMessage('Error al cargar la página', 'error');
+            }
+        });
+
+        async function loadSubjects() {
+            try {
+                const response = await AdminAPI.getAllSubjects();
+                console.log('Subjects loaded:', response);
+                
+                subjects = response.subjects;
+                
+                // Populate subject dropdown
+                const subjectSelect = document.getElementById('subject_id');
+                subjects.forEach(subject => {
+                    const option = document.createElement('option');
+                    option.value = subject.id;
+                    option.textContent = `${subject.code} - ${subject.name}`;
+                    subjectSelect.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                showMessage('Error al cargar materias', 'error');
+            }
+        }
+
+        async function loadProfessors() {
+            try {
+                const response = await AdminAPI.getAllProfessors();
+                console.log('Professors loaded:', response);
+                
+                professors = response.professors || [];
+                console.log('Professor list:', professors);
+                
+                // Populate professor dropdown
+                const professorSelect = document.getElementById('professor_id');
+                professors.forEach(prof => {
+                    const option = document.createElement('option');
+                    option.value = prof.id;  // Use prof.id which is the professors table ID
+                    option.textContent = `${prof.name} (${prof.email})`;
+                    professorSelect.appendChild(option);
+                    console.log(`Added professor: ${prof.name} with id ${prof.id}`);
+                });
+                
+            } catch (error) {
+                console.error('Error loading professors:', error);
+                showMessage('Error al cargar profesores', 'error');
+            }
+        }
+
+        async function createGroup(event) {
+            event.preventDefault();
+            
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = '';
+            
+            try {
+                const formData = {
+                    subject_id: parseInt(document.getElementById('subject_id').value),
+                    professor_id: parseInt(document.getElementById('professor_id').value),
+                    group_name: document.getElementById('group_name').value.trim(),
+                    semester_period: document.getElementById('semester_period').value.trim(),
+                    schedule: document.getElementById('schedule').value.trim() || null,
+                    classroom: document.getElementById('classroom').value.trim() || null,
+                    current_students: parseInt(document.getElementById('current_students').value),
+                    is_active: document.getElementById('is_active').checked
+                };
+
+                console.log('Creating group with data:', formData);
+                
+                const result = await AdminAPI.createGroup(formData);
+                console.log('Group created:', result);
+                
+                showMessage('✓ Grupo creado exitosamente', 'success');
+                
+                // Reset form
+                document.getElementById('createGroupForm').reset();
+                
+                // Redirect after delay
+                setTimeout(() => {
+                    window.location.href = 'admin-dashboard-preview.html';
+                }, 2000);
+                
+            } catch (error) {
+                console.error('Error creating group:', error);
+                showMessage('Error al crear el grupo: ' + (error.message || 'Error desconocido'), 'error');
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            const bgColor = type === 'success' ? 'bg-green-50 border-green-200 text-green-800' : 'bg-red-50 border-red-200 text-red-800';
+            messageContainer.innerHTML = `
+                <div class="mb-4 p-3 ${bgColor} border rounded-lg">
+                    ${message}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

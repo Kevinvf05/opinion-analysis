@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Materias - Profesor UAEM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../js/professor-api.js"></script>
+    <style>
+        .btn-pastel-blue { background-color: #A8DADC; color: #1D3557; }
+        .btn-pastel-blue:hover { background-color: #8FC9CC; }
+        .btn-pastel-purple { background-color: #D4C5F9; color: #4A1A6C; }
+        .btn-pastel-purple:hover { background-color: #C3B0E8; }
+        .btn-pastel-red { background-color: #FFB5B5; color: #8B1E1E; }
+        .btn-pastel-red:hover { background-color: #FFA0A0; }
+    </style>
+</head>
+<body style="background-color: #89c2d9;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span id="professorName" class="text-xs sm:text-sm text-gray-600">Cargando...</span>
+                <button onclick="logout()" class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="professor-dashboard.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="professor-subjects.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Mis Materias
+                </a>
+                <a href="professor-profile.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Mi Perfil
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 max-w-7xl mx-auto">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">Mis Materias</h1>
+        </div>
+
+        <!-- Subject Cards Container -->
+        <div id="subjectsContainer" class="grid grid-cols-1 gap-6 mb-8">
+            <p class="text-center text-white">Cargando materias...</p>
+        </div>
+    </main>
+
+    <script>
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
+        // Load subjects on page load
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                // Check authentication
+                const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+                console.log('Current user:', currentUser);
+                
+                if (!currentUser || currentUser.role !== 'professor') {
+                    console.error('Not authenticated as professor');
+                    window.location.href = '/login.html';
+                    return;
+                }
+
+                // Update professor name in header
+                document.getElementById('professorName').textContent = `Profesor: ${currentUser.first_name} ${currentUser.last_name}`;
+
+                console.log('Fetching subjects from API...');
+                // Fetch subjects data
+                const subjectsData = await ProfessorAPI.getSubjects();
+                console.log('Subjects data received:', subjectsData);
+                console.log('Number of subjects:', subjectsData.subjects ? subjectsData.subjects.length : 0);
+                
+                // Render subjects
+                renderSubjects(subjectsData.subjects);
+
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                document.getElementById('subjectsContainer').innerHTML = '<p class="text-center text-red-500">Error al cargar las materias.</p>';
+            }
+        });
+
+        function renderSubjects(subjects) {
+            const container = document.getElementById('subjectsContainer');
+            
+            console.log('Rendering subjects:', subjects);
+            
+            if (!subjects || subjects.length === 0) {
+                container.innerHTML = '<p class="text-center text-white">No hay materias asignadas.</p>';
+                return;
+            }
+
+            const colors = [
+                { gradient: 'from-purple-500 to-purple-600', border: 'purple-200', text: 'purple-700', bg: 'purple-50' },
+                { gradient: 'from-blue-500 to-blue-600', border: 'blue-200', text: 'blue-700', bg: 'blue-50' },
+                { gradient: 'from-green-500 to-green-600', border: 'green-200', text: 'green-700', bg: 'green-50' }
+            ];
+
+            container.innerHTML = subjects.map((subject, index) => {
+                const color = colors[index % colors.length];
+                const sentiment = subject.sentiment || { positive: 0, neutral: 0, negative: 0, total: 0 };
+                
+                console.log(`Rendering subject ${index}:`, {
+                    name: subject.name,
+                    code: subject.code,
+                    groups: subject.groups ? subject.groups.length : 0,
+                    sentiment: sentiment
+                });
+                
+                return `
+                    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+                        <div class="bg-gradient-to-r ${color.gradient} p-6">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div>
+                                    <h2 class="text-2xl font-bold text-white mb-2">${subject.name}</h2>
+                                    <p class="text-white text-opacity-90">Código: ${subject.code} | Semestre: ${subject.semester || 'N/A'}</p>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <div class="text-center bg-white bg-opacity-20 rounded-lg px-4 py-2">
+                                        <p class="text-2xl font-bold text-white">${subject.satisfaction}%</p>
+                                        <p class="text-xs text-white text-opacity-90">Satisfacción</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="p-6">
+                            <!-- Groups -->
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Grupos</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                ${(subject.groups && subject.groups.length > 0) ? subject.groups.map(group => {
+                                    const satisfactionColor = subject.satisfaction >= 80 ? 'green' : subject.satisfaction >= 60 ? 'yellow' : 'red';
+                                    return `
+                                        <div class="border border-${color.border} rounded-lg p-4 hover:shadow-md transition">
+                                            <div class="flex justify-between items-start mb-3">
+                                                <div>
+                                                    <p class="text-lg font-bold text-${color.text}">GRUPO ${group.name}</p>
+                                                    <p class="text-sm text-gray-600">${group.students} estudiantes</p>
+                                                </div>
+                                                <span class="px-3 py-1 bg-${satisfactionColor}-100 text-${satisfactionColor}-800 rounded-full text-xs font-semibold">
+                                                    ${subject.satisfaction}% Positivo
+                                                </span>
+                                            </div>
+                                            <p class="text-sm text-gray-600 mb-2">
+                                                <strong>Horario:</strong> ${group.schedule || 'Por definir'}
+                                            </p>
+                                            <p class="text-sm text-gray-600">
+                                                <strong>Periodo:</strong> ${group.semester_period || 'N/A'}
+                                            </p>
+                                        </div>
+                                    `;
+                                }).join('') : '<p class="text-gray-500">No hay grupos asignados</p>'}
+                            </div>
+
+                            <!-- Sentiment Stats -->
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                <div class="text-center p-3 bg-green-50 rounded-lg">
+                                    <p class="text-2xl font-bold text-green-700">${sentiment.positive}</p>
+                                    <p class="text-xs text-gray-600">Positivos</p>
+                                </div>
+                                <div class="text-center p-3 bg-yellow-50 rounded-lg">
+                                    <p class="text-2xl font-bold text-yellow-700">${sentiment.neutral}</p>
+                                    <p class="text-xs text-gray-600">Neutrales</p>
+                                </div>
+                                <div class="text-center p-3 bg-red-50 rounded-lg">
+                                    <p class="text-2xl font-bold text-red-700">${sentiment.negative}</p>
+                                    <p class="text-xs text-gray-600">Negativos</p>
+                                </div>
+                                <div class="text-center p-3 bg-blue-50 rounded-lg">
+                                    <p class="text-2xl font-bold text-blue-700">${sentiment.total}</p>
+                                    <p class="text-xs text-gray-600">Total</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

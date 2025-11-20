@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Profesores - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body style="background-color: #89c2d9;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span class="text-xs sm:text-sm text-gray-600">Admin: Juan Pérez</span>
+                <button class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="admin-dashboard-preview.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="admin-users.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Gestionar Usuarios
+                </a>
+                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Profesores
+                </a>
+                <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Usuario
+                </a>
+                <a href="admin-create-subject.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Materia
+                </a>
+                <a href="admin-create-group.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Grupo
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 w-full max-w-[1800px] mx-auto">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-white">Gestión de Profesores</h1>
+            <button onclick="showAddModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition">
+                + Agregar Profesor
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <!-- Professors Table -->
+            <div class="xl:col-span-3 bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 30%;">Nombre</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell" style="width: 35%;">Email</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">Materias</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 20%;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="professorsTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Professors will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Professor Preview Panel -->
+            <div id="professorPreview" class="hidden xl:block xl:col-span-1 bg-white rounded-lg shadow-lg p-6 h-fit sticky top-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Detalles del Profesor</h3>
+                <div id="previewContent">
+                    <!-- Preview content will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Professor Modal -->
+    <div id="professorModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-md w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 id="modalTitle" class="text-2xl font-bold text-gray-800">Agregar Profesor</h2>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="professorForm" onsubmit="saveProfessor(event)">
+                <input type="hidden" id="professorId">
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Nombre</label>
+                    <input type="text" id="firstName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Juan">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Apellido</label>
+                    <input type="text" id="lastName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Pérez">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Email</label>
+                    <input type="email" id="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="profesor@universidad.edu">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Departamento</label>
+                    <input type="text" id="department" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ciencias de la Computación">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Oficina</label>
+                    <input type="text" id="office" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Edificio A, Oficina 301">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Especialización</label>
+                    <input type="text" id="specialization" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Inteligencia Artificial">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Contraseña</label>
+                    <div class="relative">
+                        <input type="password" id="password" class="w-full px-3 py-2 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Mínimo 8 caracteres">
+                        <button type="button" onclick="togglePassword()" class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                            <svg id="eyeIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <p id="passwordHint" class="text-xs text-gray-500 mt-1 hidden">Dejar en blanco para mantener la contraseña actual</p>
+                </div>
+
+                <div class="flex space-x-4">
+                    <button type="button" onclick="closeModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Manage Subjects Modal -->
+    <div id="subjectsModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl p-8 max-w-2xl w-full mx-4 max-h-screen overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Gestionar Materias</h2>
+                <button onclick="closeSubjectsModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="mb-6">
+                <h3 id="subjectsProfessorName" class="text-lg font-semibold text-gray-700 mb-4"></h3>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Agregar Materia</label>
+                    <div class="flex space-x-2">
+                        <select id="availableSubjects" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccionar materia...</option>
+                            <option value="Arquitectura de Software">Arquitectura de Software</option>
+                            <option value="Base de Datos">Base de Datos</option>
+                            <option value="Desarrollo Web">Desarrollo Web</option>
+                            <option value="Inteligencia Artificial">Inteligencia Artificial</option>
+                            <option value="Redes de Computadoras">Redes de Computadoras</option>
+                            <option value="Sistemas Operativos">Sistemas Operativos</option>
+                            <option value="Programación Avanzada">Programación Avanzada</option>
+                        </select>
+                        <button onclick="addSubject()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-lg transition">
+                            Agregar
+                        </button>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">Materias Asignadas</label>
+                    <div id="assignedSubjectsList" class="space-y-2">
+                        <!-- Assigned subjects will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeSubjectsModal()" class="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition">
+                Cerrar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Sample data
+        let professors = [
+            { id: 1, firstName: 'María', lastName: 'González', email: 'mgonzalez@uni.edu', subjects: ['Arquitectura de Software', 'Desarrollo Web'] },
+            { id: 2, firstName: 'Carlos', lastName: 'Rodríguez', email: 'crodriguez@uni.edu', subjects: ['Base de Datos'] },
+            { id: 3, firstName: 'Ana', lastName: 'López', email: 'alopez@uni.edu', subjects: ['Desarrollo Web', 'Programación Avanzada'] },
+            { id: 4, firstName: 'Pedro', lastName: 'Martínez', email: 'pmartinez@uni.edu', subjects: ['Inteligencia Artificial'] }
+        ];
+
+        let currentProfessorId = null;
+
+        function loadProfessors() {
+            const tbody = document.getElementById('professorsTable');
+            tbody.innerHTML = '';
+
+            professors.forEach(prof => {
+                const row = `
+                    <tr class="hover:bg-gray-50 cursor-pointer" onclick="showPreview(${prof.id})">
+                        <td class="px-6 py-4">
+                            <div class="text-sm font-medium text-gray-900">${prof.firstName} ${prof.lastName}</div>
+                            <div class="text-xs text-gray-500 sm:hidden">${prof.email}</div>
+                        </td>
+                        <td class="px-6 py-4 text-sm text-gray-600 hidden sm:table-cell">${prof.email}</td>
+                        <td class="px-6 py-4 text-sm text-gray-600">
+                            <span class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-purple-100 text-purple-800 whitespace-nowrap">
+                                ${prof.subjects.length} materia${prof.subjects.length !== 1 ? 's' : ''}
+                            </span>
+                        </td>
+                        <td class="px-6 py-4 text-sm space-x-3" onclick="event.stopPropagation()">
+                            <button onclick="editProfessor(${prof.id})" class="text-blue-600 hover:text-blue-900 font-semibold">Editar</button>
+                            <button onclick="deleteProfessor(${prof.id})" class="text-red-600 hover:text-red-900 font-semibold">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function showPreview(id) {
+            const prof = professors.find(p => p.id === id);
+            if (!prof) return;
+
+            currentProfessorId = id;
+            const previewPanel = document.getElementById('professorPreview');
+            const previewContent = document.getElementById('previewContent');
+
+            previewContent.innerHTML = `
+                <div class="text-center mb-6">
+                    <div class="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full mx-auto flex items-center justify-center text-white text-2xl sm:text-3xl font-bold mb-3">
+                        ${prof.firstName.charAt(0)}${prof.lastName.charAt(0)}
+                    </div>
+                    <h4 class="text-lg sm:text-xl font-bold text-gray-800">${prof.firstName} ${prof.lastName}</h4>
+                    <p class="text-xs sm:text-sm text-gray-600 break-all">${prof.email}</p>
+                </div>
+
+                <div class="mb-6">
+                    <h5 class="text-xs sm:text-sm font-bold text-gray-700 mb-2">MATERIAS ASIGNADAS</h5>
+                    <div class="space-y-2">
+                        ${prof.subjects.length > 0 ? 
+                            prof.subjects.map(subject => `
+                                <div class="p-2 bg-purple-50 rounded-lg text-xs sm:text-sm text-purple-800">
+                                    📚 ${subject}
+                                </div>
+                            `).join('') :
+                            '<p class="text-xs sm:text-sm text-gray-500 italic">Sin materias asignadas</p>'
+                        }
+                    </div>
+                </div>
+
+                <button onclick="manageSubjects(${prof.id})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition mb-2 text-sm">
+                    📖 Gestionar Materias
+                </button>
+
+                <button onclick="editProfessor(${prof.id})" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm">
+                    ✏️ Editar Profesor
+                </button>
+            `;
+
+            previewPanel.classList.remove('hidden');
+        }
+
+        function manageSubjects(id) {
+            const prof = professors.find(p => p.id === id);
+            if (!prof) return;
+
+            currentProfessorId = id;
+            document.getElementById('subjectsProfessorName').textContent = `${prof.firstName} ${prof.lastName}`;
+            updateAssignedSubjectsList();
+            document.getElementById('subjectsModal').classList.remove('hidden');
+        }
+
+        function updateAssignedSubjectsList() {
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) return;
+
+            const list = document.getElementById('assignedSubjectsList');
+            
+            if (prof.subjects.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-500 italic p-3 bg-gray-50 rounded-lg">Sin materias asignadas</p>';
+                return;
+            }
+
+            list.innerHTML = prof.subjects.map((subject, index) => `
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <span class="text-sm font-medium text-purple-800">📚 ${subject}</span>
+                    <button onclick="removeSubject(${index})" class="text-red-600 hover:text-red-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addSubject() {
+            const select = document.getElementById('availableSubjects');
+            const subjectName = select.value;
+
+            if (!subjectName) {
+                alert('Por favor seleccione una materia');
+                return;
+            }
+
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) return;
+
+            if (prof.subjects.includes(subjectName)) {
+                alert('Esta materia ya está asignada');
+                return;
+            }
+
+            prof.subjects.push(subjectName);
+            updateAssignedSubjectsList();
+            select.value = '';
+            loadProfessors();
+            if (document.getElementById('professorPreview').classList.contains('hidden') === false) {
+                showPreview(currentProfessorId);
+            }
+        }
+
+        function removeSubject(index) {
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) return;
+
+            if (confirm('¿Está seguro de eliminar esta materia?')) {
+                prof.subjects.splice(index, 1);
+                updateAssignedSubjectsList();
+                loadProfessors();
+                if (document.getElementById('professorPreview').classList.contains('hidden') === false) {
+                    showPreview(currentProfessorId);
+                }
+            }
+        }
+
+        function closeSubjectsModal() {
+            document.getElementById('subjectsModal').classList.add('hidden');
+        }
+
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"></path>
+                `;
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.innerHTML = `
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                `;
+            }
+        }
+
+        function showAddModal() {
+            document.getElementById('modalTitle').textContent = 'Agregar Profesor';
+            document.getElementById('professorForm').reset();
+            document.getElementById('professorId').value = '';
+            document.getElementById('password').required = true;
+            document.getElementById('passwordHint').classList.add('hidden');
+            document.getElementById('professorModal').classList.remove('hidden');
+        }
+
+        function editProfessor(id) {
+            const prof = professors.find(p => p.id === id);
+            if (!prof) return;
+
+            document.getElementById('modalTitle').textContent = 'Editar Profesor';
+            document.getElementById('professorId').value = prof.id;
+            document.getElementById('firstName').value = prof.firstName;
+            document.getElementById('lastName').value = prof.lastName;
+            document.getElementById('email').value = prof.email;
+            document.getElementById('password').value = '';
+            document.getElementById('password').required = false;
+            document.getElementById('passwordHint').classList.remove('hidden');
+            document.getElementById('professorModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('professorModal').classList.add('hidden');
+        }
+
+        function saveProfessor(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('professorId').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+
+            if (id) {
+                const prof = professors.find(p => p.id === parseInt(id));
+                if (prof) {
+                    prof.firstName = firstName;
+                    prof.lastName = lastName;
+                    prof.email = email;
+                    alert('Profesor actualizado exitosamente');
+                    if (!document.getElementById('professorPreview').classList.contains('hidden')) {
+                        showPreview(parseInt(id));
+                    }
+                }
+            } else {
+                const newId = Math.max(...professors.map(p => p.id)) + 1;
+                professors.push({
+                    id: newId,
+                    firstName,
+                    lastName,
+                    email,
+                    subjects: []
+                });
+                alert('Profesor agregado exitosamente');
+            }
+
+            closeModal();
+            loadProfessors();
+        }
+
+        function deleteProfessor(id) {
+            if (confirm('¿Está seguro de eliminar este profesor?')) {
+                professors = professors.filter(p => p.id !== id);
+                document.getElementById('professorPreview').classList.add('hidden');
+                loadProfessors();
+                alert('Profesor eliminado exitosamente');
+            }
+        }
+
+        loadProfessors();
+    </script>
+
+    <!-- Include API files -->
+    <script src="/js/user-management-api.js"></script>
+    
+    <script>
+        // Override functions to use backend API
+        
+        // Load professors from backend
+        async function loadProfessorsFromBackend() {
+            try {
+                const response = await getAllProfessorsForManagement();
+                professors = response.professors.map(prof => ({
+                    id: prof.id,
+                    user_id: prof.user_id,
+                    firstName: prof.name.split(' ')[0],
+                    lastName: prof.name.split(' ').slice(1).join(' '),
+                    email: prof.email,
+                    department: prof.department || '',
+                    office: prof.office || '',
+                    specialization: prof.specialization || '',
+                    is_active: prof.is_active,
+                    subjects: prof.subjects.map(s => `${s.code} - ${s.name}`) // Format subjects as strings
+                }));
+                
+                loadProfessors();
+            } catch (error) {
+                console.error('Error loading professors:', error);
+                alert('Error al cargar profesores: ' + error.message);
+            }
+        }
+
+        // Override saveProfessor to use backend API
+        async function saveProfessorToBackend(event) {
+            event.preventDefault();
+            
+            const id = document.getElementById('professorId').value;
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const department = document.getElementById('department').value;
+            const office = document.getElementById('office').value;
+            const specialization = document.getElementById('specialization').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const professorData = {
+                    first_name: firstName,
+                    last_name: lastName,
+                    email: email,
+                    department: department,
+                    office: office,
+                    specialization: specialization
+                };
+
+                // Add password only if provided
+                if (password) {
+                    professorData.password = password;
+                }
+
+                if (id) {
+                    // Update existing professor
+                    await updateProfessor(parseInt(id), professorData);
+                    alert('Profesor actualizado exitosamente');
+                } else {
+                    // Create new professor
+                    professorData.role = 'professor';
+                    professorData.password = password || 'ChangeMe123!'; // Default password if not provided
+                    await createUser(professorData);
+                    alert('Profesor agregado exitosamente');
+                }
+
+                closeModal();
+                await loadProfessorsFromBackend();
+                
+                if (!document.getElementById('professorPreview').classList.contains('hidden')) {
+                    showPreview(parseInt(id));
+                }
+            } catch (error) {
+                console.error('Error saving professor:', error);
+                alert('Error al guardar profesor: ' + error.message);
+            }
+        }
+
+        // Override deleteProfessor to use backend API
+        async function deleteProfessorFromBackend(id) {
+            if (!confirm('¿Está seguro de eliminar este profesor?')) {
+                return;
+            }
+
+            try {
+                const prof = professors.find(p => p.id === id);
+                if (!prof) return;
+
+                // Delete via user API (since professors are users)
+                await deleteUser(prof.user_id);
+                
+                document.getElementById('professorPreview').classList.add('hidden');
+                await loadProfessorsFromBackend();
+                alert('Profesor eliminado exitosamente');
+            } catch (error) {
+                console.error('Error deleting professor:', error);
+                alert('Error al eliminar profesor: ' + error.message);
+            }
+        }
+
+        // Modify editProfessor to include all fields
+        function editProfessorWithDetails(id) {
+            const prof = professors.find(p => p.id === id);
+            if (!prof) return;
+
+            document.getElementById('modalTitle').textContent = 'Editar Profesor';
+            document.getElementById('professorId').value = prof.id;
+            document.getElementById('firstName').value = prof.firstName;
+            document.getElementById('lastName').value = prof.lastName;
+            document.getElementById('email').value = prof.email;
+            document.getElementById('department').value = prof.department || '';
+            document.getElementById('office').value = prof.office || '';
+            document.getElementById('specialization').value = prof.specialization || '';
+            document.getElementById('password').value = '';
+            document.getElementById('password').required = false;
+            document.getElementById('passwordHint').classList.remove('hidden');
+            document.getElementById('professorModal').classList.remove('hidden');
+        }
+
+        // Replace original functions with backend versions
+        const originalSaveProfessor = saveProfessor;
+        saveProfessor = saveProfessorToBackend;
+        
+        const originalDeleteProfessor = deleteProfessor;
+        deleteProfessor = deleteProfessorFromBackend;
+        
+        const originalEditProfessor = editProfessor;
+        editProfessor = editProfessorWithDetails;
+
+        // Check auth and load professors on page load
+        document.addEventListener('DOMContentLoaded', async () => {
+            const token = localStorage.getItem('authToken');
+            const currentUserStr = localStorage.getItem('currentUser');
+            
+            if (!token || !currentUserStr) {
+                alert('No se encontró información de autenticación. Por favor, inicia sesión nuevamente.');
+                window.location.href = '/login.html';
+                return;
+            }
+            
+            try {
+                const currentUser = JSON.parse(currentUserStr);
+                
+                if (currentUser.role !== 'admin') {
+                    alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
+                    window.location.href = '/login.html';
+                    return;
+                }
+                
+                // Load professors from backend
+                await loadProfessorsFromBackend();
+                
+            } catch (error) {
+                console.error('Error loading page:', error);
+                alert('Error al cargar la página: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>
