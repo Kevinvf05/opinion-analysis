@@ -362,9 +362,9 @@
                     document.getElementById('total-professors').textContent = stats.total_professors || 0;
                     document.getElementById('total-students').textContent = stats.total_students || 0;
                     
-                    // Calculate participation rate
+                    // Calculate participation rate (unique students who completed surveys / total students)
                     const participationRate = stats.total_students > 0 
-                        ? ((stats.total_surveys / stats.total_students) * 100).toFixed(1)
+                        ? Math.min(((stats.students_with_surveys / stats.total_students) * 100), 100).toFixed(1)
                         : 0;
                     document.getElementById('participation-rate').textContent = `${participationRate}%`;
                 }

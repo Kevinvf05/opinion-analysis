@@ -30,6 +30,11 @@ def get_dashboard_stats(current_user):
         completed_surveys = Survey.query.filter_by(status='completed').count()
         pending_surveys = Survey.query.filter_by(status='pending').count()
         
+        # Calculate unique students who completed surveys for participation rate
+        students_with_surveys = db.session.query(Survey.student_id).filter(
+            Survey.status == 'completed'
+        ).distinct().count()
+        
         # Get subjects and groups
         total_subjects = Subject.query.count()
         total_groups = GroupClass.query.count()
@@ -57,7 +62,8 @@ def get_dashboard_stats(current_user):
                 'total_groups': total_groups,
                 'total_surveys': total_surveys,
                 'completed_surveys': completed_surveys,
-                'pending_surveys': pending_surveys
+                'pending_surveys': pending_surveys,
+                'students_with_surveys': students_with_surveys
             },
             'recent_activities': activities_list
         }), 200

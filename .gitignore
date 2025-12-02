@@ -279,3 +279,18 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Machine Learning Model Files
+# Ignore model weights and tokenizer files (large binary files)
+final_model/
+backend/final_model/
+*.safetensors
+*.bin
+*.h5
+*.ckpt
+*.pt
+*.pth
+model.safetensors
+tokenizer.json
+vocab.txt
+config.json
