@@ -78,7 +78,7 @@ class Student(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationship
-    user = db.relationship('User', backref=db.backref('student', uselist=False))
+    user = db.relationship('User', backref=db.backref('student', uselist=False), passive_deletes=True)
     
     def __repr__(self):
         return f'<Student {self.matricula}>'
@@ -100,7 +100,7 @@ class Professor(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationship
-    user = db.relationship('User', backref=db.backref('professor', uselist=False))
+    user = db.relationship('User', backref=db.backref('professor', uselist=False), passive_deletes=True)
     
     def __repr__(self):
         return f'<Professor {self.email}>'
@@ -118,7 +118,7 @@ class Admin(db.Model):
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationship
-    user = db.relationship('User', backref=db.backref('admin', uselist=False))
+    user = db.relationship('User', backref=db.backref('admin', uselist=False), passive_deletes=True)
     
     def __repr__(self):
         return f'<Admin {self.user_id}>'

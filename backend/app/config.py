@@ -16,6 +16,11 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     # SQLAlchemy echo flag for debugging
     SQLALCHEMY_ECHO = False
+    # SQLAlchemy engine options - let PostgreSQL handle CASCADE
+    SQLALCHEMY_ENGINE_OPTIONS = {
+        'pool_pre_ping': True,
+        'pool_recycle': 300,
+    }
     
     # JWT Configuration
     JWT_SECRET_KEY = SECRET_KEY

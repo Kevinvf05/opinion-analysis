@@ -257,10 +257,10 @@
                 const matricula = document.getElementById('matricula').value;
                 const name = document.getElementById('studentName').value;
                 
-                // Validate matrícula format
-                const matriculaPattern = /^[A-Za-z][0-9]{8}$/;
+                // Validate matrícula format (1 letter followed by 8-9 digits)
+                const matriculaPattern = /^[A-Za-z][0-9]{8,9}$/;
                 if (!matriculaPattern.test(matricula)) {
-                    showError('La matrícula debe tener el formato: 1 letra seguida de 8 dígitos');
+                    showError('La matrícula debe tener el formato: 1 letra seguida de 8-9 dígitos');
                     return;
                 }
                 

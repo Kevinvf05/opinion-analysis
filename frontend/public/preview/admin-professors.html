@@ -6,14 +6,14 @@
     <title>Editar Profesores - Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body style="background-color: #89c2d9;">
+<body style="background-color: #e7e9ee;">
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
             <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
             <div class="flex items-center space-x-4">
-                <span class="text-xs sm:text-sm text-gray-600">Admin: Juan Pérez</span>
-                <button class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
+                <span id="adminName" class="text-xs sm:text-sm text-gray-600">Admin: Cargando...</span>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
                     Cerrar Sesión
                 </button>
             </div>
@@ -33,6 +33,9 @@
                 <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
                     Profesores
                 </a>
+                <a href="admin-subjects.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Materias
+                </a>
                 <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
                     Crear Usuario
                 </a>
@@ -49,7 +52,7 @@
     <!-- Main Content -->
     <main class="p-4 sm:p-6 w-full max-w-[1800px] mx-auto">
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h1 class="text-2xl sm:text-3xl font-bold text-white">Gestión de Profesores</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Profesores</h1>
             <button onclick="showAddModal()" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition">
                 + Agregar Profesor
             </button>
@@ -213,11 +216,27 @@
             { id: 4, firstName: 'Pedro', lastName: 'Martínez', email: 'pmartinez@uni.edu', subjects: ['Inteligencia Artificial'] }
         ];
 
-        let currentProfessorId = null;
+        // currentProfessorId will be declared in the backend integration script
 
         function loadProfessors() {
+            console.log('========== RENDERING PROFESSORS TABLE ==========');
+            console.log('Professors to render:', professors.length);
+            
             const tbody = document.getElementById('professorsTable');
             tbody.innerHTML = '';
+
+            if (professors.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="px-6 py-8 text-center text-gray-500">
+                            No hay profesores registrados
+                        </td>
+                    </tr>
+                `;
+                console.log('No professors to display');
+                console.log('==================================================');
+                return;
+            }
 
             professors.forEach(prof => {
                 const row = `
@@ -240,6 +259,9 @@
                 `;
                 tbody.innerHTML += row;
             });
+            
+            console.log('Table rendered with', professors.length, 'rows');
+            console.log('==================================================');
         }
 
         function showPreview(id) {
@@ -249,6 +271,16 @@
             currentProfessorId = id;
             const previewPanel = document.getElementById('professorPreview');
             const previewContent = document.getElementById('previewContent');
+            
+            // Format subjects for display
+            const subjectsDisplay = prof.subjects.map(subject => {
+                if (typeof subject === 'string') {
+                    return subject;
+                } else if (typeof subject === 'object' && subject !== null) {
+                    return `${subject.code} - ${subject.name}`;
+                }
+                return '';
+            }).filter(s => s);
 
             previewContent.innerHTML = `
                 <div class="text-center mb-6">
@@ -257,13 +289,14 @@
                     </div>
                     <h4 class="text-lg sm:text-xl font-bold text-gray-800">${prof.firstName} ${prof.lastName}</h4>
                     <p class="text-xs sm:text-sm text-gray-600 break-all">${prof.email}</p>
+                    ${!prof.is_active ? '<p class="text-xs sm:text-sm text-red-600 font-semibold mt-2">⚠️ INACTIVO</p>' : ''}
                 </div>
 
                 <div class="mb-6">
                     <h5 class="text-xs sm:text-sm font-bold text-gray-700 mb-2">MATERIAS ASIGNADAS</h5>
                     <div class="space-y-2">
-                        ${prof.subjects.length > 0 ? 
-                            prof.subjects.map(subject => `
+                        ${subjectsDisplay.length > 0 ? 
+                            subjectsDisplay.map(subject => `
                                 <div class="p-2 bg-purple-50 rounded-lg text-xs sm:text-sm text-purple-800">
                                     📚 ${subject}
                                 </div>
@@ -273,7 +306,7 @@
                     </div>
                 </div>
 
-                <button onclick="manageSubjects(${prof.id})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition mb-2 text-sm">
+                <button onclick="manageSubjects(${prof.id})" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition mb-2 text-sm ${!prof.is_active ? 'opacity-50 cursor-not-allowed' : ''}">
                     📖 Gestionar Materias
                 </button>
 
@@ -457,14 +490,22 @@
 
     <!-- Include API files -->
     <script src="/js/user-management-api.js"></script>
+    <script src="/js/admin-api.js?v=20251125b"></script>
     
     <script>
+        // Global variables
+        let allSubjects = []; // All subjects from database
+        let currentProfessorId = null;
+        
         // Override functions to use backend API
         
         // Load professors from backend
         async function loadProfessorsFromBackend() {
             try {
+                console.log('========== LOADING PROFESSORS FROM BACKEND ==========');
                 const response = await getAllProfessorsForManagement();
+                console.log('API Response:', response);
+                
                 professors = response.professors.map(prof => ({
                     id: prof.id,
                     user_id: prof.user_id,
@@ -475,8 +516,12 @@
                     office: prof.office || '',
                     specialization: prof.specialization || '',
                     is_active: prof.is_active,
-                    subjects: prof.subjects.map(s => `${s.code} - ${s.name}`) // Format subjects as strings
+                    subjects: prof.subjects || [] // Keep full subject objects
                 }));
+                
+                console.log('Professors loaded:', professors.length);
+                console.log('Professor IDs:', professors.map(p => p.id));
+                console.log('======================================================');
                 
                 loadProfessors();
             } catch (error) {
@@ -484,6 +529,269 @@
                 alert('Error al cargar profesores: ' + error.message);
             }
         }
+        
+        // Load all subjects from database
+        async function loadAllSubjects() {
+            try {
+                console.log('Loading all subjects from database...');
+                
+                // Get token from localStorage (admin-api.js getToken function)
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                
+                // Use the API_BASE_URL from admin-api.js
+                const apiUrl = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : '/api';
+                
+                const response = await fetch(`${apiUrl}/admin/subjects`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch subjects');
+                }
+                
+                const data = await response.json();
+                console.log('Response from API:', data);
+                allSubjects = data.subjects || [];
+                console.log('All subjects loaded successfully:', allSubjects);
+                console.log('Total subjects count:', allSubjects.length);
+                
+                // Detailed logging for each subject
+                allSubjects.forEach(s => {
+                    console.log(`Subject: ${s.code} - ${s.name} | professor_id: ${s.professor_id} | is_active: ${s.is_active}`);
+                });
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                console.error('Error details:', error.message, error.stack);
+                alert('Error al cargar materias: ' + error.message);
+                allSubjects = [];
+            }
+        }
+        
+        // Override manageSubjects to load actual subjects
+        async function manageSubjectsFromDB(id) {
+            const prof = professors.find(p => p.id === id);
+            if (!prof) return;
+            
+            // Check if professor is inactive
+            if (!prof.is_active) {
+                alert('No se pueden asignar materias a un profesor inactivo. Por favor, active al profesor primero.');
+                return;
+            }
+            
+            currentProfessorId = id;
+            document.getElementById('subjectsProfessorName').textContent = `${prof.firstName} ${prof.lastName}`;
+            
+            // Load all subjects if not already loaded
+            if (allSubjects.length === 0) {
+                await loadAllSubjects();
+            }
+            
+            // Populate available subjects dropdown
+            populateAvailableSubjects();
+            
+            // Update assigned subjects list
+            updateAssignedSubjectsList();
+            
+            document.getElementById('subjectsModal').classList.remove('hidden');
+        }
+        
+        // Populate available subjects dropdown (only unassigned subjects)
+        function populateAvailableSubjects() {
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) {
+                console.error('Professor not found:', currentProfessorId);
+                return;
+            }
+            
+            console.log('Current professor:', prof);
+            console.log('All subjects:', allSubjects);
+            console.log('Professor subjects:', prof.subjects);
+            
+            const select = document.getElementById('availableSubjects');
+            select.innerHTML = '<option value="">Seleccionar materia...</option>';
+            
+            // Get subjects not assigned to this professor
+            const assignedSubjectIds = prof.subjects.map(s => s.id);
+            console.log('Assigned subject IDs:', assignedSubjectIds);
+            
+            // Filter available subjects (not assigned to ANY professor or assigned to THIS professor but we'll exclude those)
+            const availableSubjects = allSubjects.filter(s => {
+                const isAssignedToThisProf = assignedSubjectIds.includes(s.id);
+                const isUnassigned = !s.professor_id || s.professor_id === null;
+                console.log(`Subject ${s.code}: isAssignedToThisProf=${isAssignedToThisProf}, isUnassigned=${isUnassigned}, professor_id=${s.professor_id}`);
+                return !isAssignedToThisProf && isUnassigned;
+            });
+            
+            console.log('Available subjects for dropdown:', availableSubjects);
+            console.log('Summary: Total subjects=' + allSubjects.length + ', This prof has=' + assignedSubjectIds.length + ', Available=' + availableSubjects.length);
+            
+            availableSubjects.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.id;
+                option.textContent = `${subject.code} - ${subject.name}`;
+                select.appendChild(option);
+            });
+            
+            if (availableSubjects.length === 0) {
+                const option = document.createElement('option');
+                option.value = "";
+                option.textContent = "No hay materias disponibles (todas están asignadas)";
+                option.disabled = true;
+                select.appendChild(option);
+                console.log('No available subjects - all subjects are assigned to professors');
+            }
+        }
+        
+        // Update assigned subjects list
+        function updateAssignedSubjectsList() {
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) return;
+
+            const list = document.getElementById('assignedSubjectsList');
+            
+            if (prof.subjects.length === 0) {
+                list.innerHTML = '<p class="text-sm text-gray-500 italic p-3 bg-gray-50 rounded-lg">Sin materias asignadas</p>';
+                return;
+            }
+
+            list.innerHTML = prof.subjects.map(subject => `
+                <div class="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <span class="text-sm font-medium text-purple-800">📚 ${subject.code} - ${subject.name}</span>
+                    <button onclick="removeSubjectFromDB(${subject.id})" class="text-red-600 hover:text-red-800">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </button>
+                </div>
+            `).join('');
+        }
+        
+        // Add subject to professor
+        async function addSubjectToDB() {
+            const select = document.getElementById('availableSubjects');
+            const subjectId = parseInt(select.value);
+
+            if (!subjectId) {
+                alert('Por favor seleccione una materia');
+                return;
+            }
+
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) return;
+            
+            // Check if professor is inactive
+            if (!prof.is_active) {
+                alert('No se pueden asignar materias a un profesor inactivo.');
+                return;
+            }
+
+            try {
+                // Update subject in database to assign to this professor
+                const token = localStorage.getItem('authToken');
+                const apiUrl = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : '/api';
+                
+                const response = await fetch(`${apiUrl}/admin/subjects/${subjectId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ professor_id: currentProfessorId })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to assign subject');
+                }
+                
+                // Find the subject in allSubjects and add to professor
+                const subject = allSubjects.find(s => s.id === subjectId);
+                if (subject) {
+                    subject.professor_id = currentProfessorId;
+                    prof.subjects.push(subject);
+                }
+                
+                // Refresh UI
+                populateAvailableSubjects();
+                updateAssignedSubjectsList();
+                select.value = '';
+                loadProfessors();
+                
+                if (!document.getElementById('professorPreview').classList.contains('hidden')) {
+                    showPreview(currentProfessorId);
+                }
+                
+                alert('Materia asignada exitosamente');
+            } catch (error) {
+                console.error('Error assigning subject:', error);
+                alert('Error al asignar materia: ' + error.message);
+            }
+        }
+        
+        // Remove subject from professor
+        async function removeSubjectFromDB(subjectId) {
+            const prof = professors.find(p => p.id === currentProfessorId);
+            if (!prof) return;
+
+            if (!confirm('¿Está seguro de eliminar esta materia?')) {
+                return;
+            }
+
+            try {
+                // Update subject in database to unassign from this professor
+                const token = localStorage.getItem('authToken');
+                const apiUrl = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : '/api';
+                
+                const response = await fetch(`${apiUrl}/admin/subjects/${subjectId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ professor_id: null })
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to remove subject');
+                }
+                
+                // Find the subject and update locally
+                const subject = allSubjects.find(s => s.id === subjectId);
+                if (subject) {
+                    subject.professor_id = null;
+                }
+                
+                // Remove from professor's subjects
+                prof.subjects = prof.subjects.filter(s => s.id !== subjectId);
+                
+                // Refresh UI
+                populateAvailableSubjects();
+                updateAssignedSubjectsList();
+                loadProfessors();
+                
+                if (!document.getElementById('professorPreview').classList.contains('hidden')) {
+                    showPreview(currentProfessorId);
+                }
+                
+                alert('Materia eliminada exitosamente');
+            } catch (error) {
+                console.error('Error removing subject:', error);
+                alert('Error al eliminar materia: ' + error.message);
+            }
+        }
+        
+        // Override the original functions
+        manageSubjects = manageSubjectsFromDB;
+        addSubject = addSubjectToDB;
+        removeSubject = removeSubjectFromDB;
 
         // Override saveProfessor to use backend API
         async function saveProfessorToBackend(event) {
@@ -544,17 +852,38 @@
             }
 
             try {
+                console.log('========== DELETING PROFESSOR ==========');
+                console.log('Professor ID:', id);
+                
                 const prof = professors.find(p => p.id === id);
-                if (!prof) return;
+                if (!prof) {
+                    console.error('Professor not found in local array:', id);
+                    alert('Error: Profesor no encontrado');
+                    return;
+                }
+                
+                console.log('Professor to delete:', prof);
+                console.log('User ID:', prof.user_id);
 
                 // Delete via user API (since professors are users)
-                await deleteUser(prof.user_id);
+                console.log('Calling deleteUser API...');
+                const deleteResponse = await deleteUser(prof.user_id);
+                console.log('Delete response:', deleteResponse);
                 
+                // Hide preview panel
                 document.getElementById('professorPreview').classList.add('hidden');
+                
+                // Reload professors list from backend
+                console.log('Reloading professors from backend...');
                 await loadProfessorsFromBackend();
+                console.log('Professors reloaded successfully');
+                console.log('Current professors count:', professors.length);
+                
                 alert('Profesor eliminado exitosamente');
+                console.log('==========================================');
             } catch (error) {
                 console.error('Error deleting professor:', error);
+                console.error('Error details:', error.message, error.stack);
                 alert('Error al eliminar profesor: ' + error.message);
             }
         }
@@ -588,6 +917,13 @@
         const originalEditProfessor = editProfessor;
         editProfessor = editProfessorWithDetails;
 
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
         // Check auth and load professors on page load
         document.addEventListener('DOMContentLoaded', async () => {
             const token = localStorage.getItem('authToken');
@@ -602,13 +938,17 @@
             try {
                 const currentUser = JSON.parse(currentUserStr);
                 
+                // Update admin name in header
+                document.getElementById('adminName').textContent = `Admin: ${currentUser.first_name} ${currentUser.last_name}`;
+                
                 if (currentUser.role !== 'admin') {
                     alert('Acceso denegado. Solo administradores pueden acceder a esta página.');
                     window.location.href = '/login.html';
                     return;
                 }
                 
-                // Load professors from backend
+                // Load professors and subjects from backend
+                await loadAllSubjects();
                 await loadProfessorsFromBackend();
                 
             } catch (error) {

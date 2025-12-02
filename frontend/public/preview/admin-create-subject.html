@@ -15,7 +15,7 @@
         .btn-pastel-red:hover { background-color: #FFA0A0; }
     </style>
 </head>
-<body style="background-color: #f3fbff;">
+<body style="background-color: #e7e9ee;">
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
@@ -41,6 +41,9 @@
                 </a>
                 <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
                     Profesores
+                </a>
+                <a href="admin-subjects.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Materias
                 </a>
                 <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
                     Crear Usuario
@@ -101,6 +104,35 @@
                         <p class="text-xs text-gray-500 mt-1">Semestre en el que se imparte la materia</p>
                     </div>
 
+                    <!-- Groups Section -->
+                    <div class="border-t pt-4 mt-4">
+                        <div class="flex justify-between items-center mb-3">
+                            <label class="block text-sm font-bold text-gray-700">Asignar a Grupos Existentes</label>
+                        </div>
+                        <p class="text-xs text-gray-500 mb-3">Selecciona los grupos donde se impartirá esta materia</p>
+                        
+                        <!-- Search/Filter Groups -->
+                        <div class="mb-3">
+                            <input type="text" id="groupSearch" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   placeholder="Buscar grupos por nombre o profesor..."
+                                   oninput="filterGroups()">
+                        </div>
+                        
+                        <!-- Available Groups List -->
+                        <div id="availableGroupsList" class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3">
+                            <p class="text-sm text-gray-500">Cargando grupos...</p>
+                        </div>
+                        
+                        <!-- Selected Groups -->
+                        <div class="mt-3">
+                            <p class="text-xs font-medium text-gray-700 mb-2">Grupos Seleccionados: <span id="selectedGroupsCount">0</span></p>
+                            <div id="selectedGroupsList" class="space-y-2">
+                                <!-- Selected groups will appear here -->
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Active Status -->
                     <div class="flex items-center">
                         <input type="checkbox" id="is_active" name="is_active" checked
@@ -125,6 +157,8 @@
 
     <script>
         let professors = [];
+        let allGroups = [];
+        let selectedGroupIds = [];
 
         // Logout function
         function logout() {
@@ -149,6 +183,7 @@
 
                 // Load professors for dropdown
                 await loadProfessors();
+                await loadGroups();
 
             } catch (error) {
                 console.error('Error loading page:', error);
@@ -164,20 +199,234 @@
                 professors = response.professors || [];
                 console.log('Professor list:', professors);
                 
-                // Populate professor dropdown
+                // Populate professor dropdown - include ALL professors (active and inactive)
                 const professorSelect = document.getElementById('professor_id');
                 professors.forEach(prof => {
                     const option = document.createElement('option');
                     option.value = prof.id;  // Use prof.id which is the professors table ID
-                    option.textContent = `${prof.name} (${prof.email})`;
+                    // Show inactive status in dropdown
+                    const statusText = prof.is_active ? '' : ' (Inactivo)';
+                    option.textContent = `${prof.name}${statusText}`;
+                    // Don't disable inactive professors - they can be assigned to subjects
                     professorSelect.appendChild(option);
-                    console.log(`Added professor: ${prof.name} with id ${prof.id}`);
+                    console.log(`Added professor: ${prof.name} with id ${prof.id} (active: ${prof.is_active})`);
                 });
                 
             } catch (error) {
                 console.error('Error loading professors:', error);
                 showMessage('Error al cargar profesores', 'error');
             }
+        }
+
+        async function loadGroups() {
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) throw new Error('No authentication token');
+                
+                const apiUrl = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : '/api';
+                
+                const response = await fetch(`${apiUrl}/admin/groups`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) throw new Error('Failed to load groups');
+                
+                const data = await response.json();
+                allGroups = data.groups || [];
+                console.log('Groups loaded:', allGroups.length);
+                console.log('All groups:', allGroups);
+                
+                renderAvailableGroups();
+                
+            } catch (error) {
+                console.error('Error loading groups:', error);
+                document.getElementById('availableGroupsList').innerHTML = 
+                    '<p class="text-sm text-red-500">Error al cargar grupos</p>';
+            }
+        }
+
+        function renderAvailableGroups() {
+            const listDiv = document.getElementById('availableGroupsList');
+            const searchTerm = document.getElementById('groupSearch').value.toLowerCase();
+            
+            console.log('Rendering groups. Total groups:', allGroups.length, 'Selected:', selectedGroupIds);
+            
+            const filtered = allGroups.filter(group => {
+                const matchesSearch = !searchTerm || 
+                    group.group_name.toLowerCase().includes(searchTerm) ||
+                    (group.professor_name && group.professor_name.toLowerCase().includes(searchTerm)) ||
+                    (group.subject_name && group.subject_name.toLowerCase().includes(searchTerm));
+                
+                return matchesSearch && !selectedGroupIds.includes(group.id);
+            });
+            
+            console.log('Filtered groups:', filtered.length);
+            
+            if (filtered.length === 0) {
+                listDiv.innerHTML = '<p class="text-sm text-gray-500">No hay grupos disponibles</p>';
+                return;
+            }
+            
+            listDiv.innerHTML = filtered.map(group => `
+                <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded border-b last:border-b-0">
+                    <div class="flex-1">
+                        <div class="text-sm font-medium">${group.group_name}</div>
+                        <div class="text-xs text-gray-500">
+                            ${group.professor_name || 'Sin profesor'} | ${group.semester_period || 'Sin periodo'}
+                            ${group.subject_name ? ` | Materia: ${group.subject_name}` : ''}
+                        </div>
+                    </div>
+                    <button type="button" onclick="selectGroup(${group.id})" 
+                            class="text-blue-600 hover:text-blue-800 text-sm font-medium px-3 py-1">
+                        Agregar
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function filterGroups() {
+            renderAvailableGroups();
+        }
+
+        function selectGroup(groupId) {
+            if (selectedGroupIds.includes(groupId)) return;
+            
+            selectedGroupIds.push(groupId);
+            updateSelectedGroupsList();
+            renderAvailableGroups();
+        }
+
+        function deselectGroup(groupId) {
+            selectedGroupIds = selectedGroupIds.filter(id => id !== groupId);
+            updateSelectedGroupsList();
+            renderAvailableGroups();
+        }
+
+        function updateSelectedGroupsList() {
+            const listDiv = document.getElementById('selectedGroupsList');
+            const countSpan = document.getElementById('selectedGroupsCount');
+            
+            countSpan.textContent = selectedGroupIds.length;
+            
+            if (selectedGroupIds.length === 0) {
+                listDiv.innerHTML = '<p class="text-sm text-gray-500 italic">No hay grupos seleccionados</p>';
+                return;
+            }
+            
+            const selectedGroups = allGroups.filter(g => selectedGroupIds.includes(g.id));
+            
+            listDiv.innerHTML = selectedGroups.map(group => `
+                <div class="flex items-center justify-between p-2 bg-blue-50 rounded-lg">
+                    <div>
+                        <div class="text-sm font-medium">${group.group_name}</div>
+                        <div class="text-xs text-gray-600">${group.professor_name || 'Sin profesor'} | ${group.semester_period || 'Sin periodo'}</div>
+                    </div>
+                    <button type="button" onclick="deselectGroup(${group.id})" 
+                            class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        Quitar
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function addGroupForm() {
+            const groupId = groupCounter++;
+            const groupsListDiv = document.getElementById('groupsList');
+            
+            const groupDiv = document.createElement('div');
+            groupDiv.id = `group-${groupId}`;
+            groupDiv.className = 'p-4 border border-gray-300 rounded-lg bg-gray-50';
+            groupDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-3">
+                    <h4 class="font-semibold text-sm">Grupo ${groupId + 1}</h4>
+                    <button type="button" onclick="removeGroup(${groupId})" 
+                            class="text-red-600 hover:text-red-800 text-sm font-medium">
+                        Eliminar
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Nombre del Grupo *</label>
+                        <input type="text" id="group_name_${groupId}" required
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: Grupo A, 101">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Profesor *</label>
+                        <select id="group_professor_${groupId}" required
+                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccionar...</option>
+                            ${professors.map(p => `<option value="${p.id}">${p.name}</option>`).join('')}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Periodo *</label>
+                        <input type="text" id="group_period_${groupId}" required
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: 2024-1">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Horario</label>
+                        <input type="text" id="group_schedule_${groupId}"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: Lun/Mie 10-12">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Aula</label>
+                        <input type="text" id="group_classroom_${groupId}"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
+                               placeholder="ej: A-101">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Máx. Estudiantes</label>
+                        <input type="number" id="group_max_${groupId}" value="30" min="1"
+                               class="w-full px-3 py-2 text-sm border border-gray-300 rounded focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+            `;
+            
+            groupsListDiv.appendChild(groupDiv);
+            groups.push(groupId);
+        }
+
+        function removeGroup(groupId) {
+            const groupDiv = document.getElementById(`group-${groupId}`);
+            if (groupDiv) {
+                groupDiv.remove();
+                groups = groups.filter(id => id !== groupId);
+            }
+        }
+
+        function collectGroupsData() {
+            const groupsData = [];
+            
+            for (const groupId of groups) {
+                const groupName = document.getElementById(`group_name_${groupId}`)?.value.trim();
+                const professorId = document.getElementById(`group_professor_${groupId}`)?.value;
+                const period = document.getElementById(`group_period_${groupId}`)?.value.trim();
+                const schedule = document.getElementById(`group_schedule_${groupId}`)?.value.trim();
+                const classroom = document.getElementById(`group_classroom_${groupId}`)?.value.trim();
+                const maxStudents = document.getElementById(`group_max_${groupId}`)?.value;
+                
+                if (groupName && professorId && period) {
+                    groupsData.push({
+                        group_name: groupName,
+                        professor_id: parseInt(professorId),
+                        semester_period: period,
+                        schedule: schedule || null,
+                        classroom: classroom || null,
+                        max_students: parseInt(maxStudents) || 30,
+                        current_students: 0,
+                        is_active: true
+                    });
+                }
+            }
+            
+            return groupsData;
         }
 
         async function createSubject(event) {
@@ -192,7 +441,8 @@
                     name: document.getElementById('name').value.trim(),
                     professor_id: document.getElementById('professor_id').value || null,
                     semester: document.getElementById('semester').value || null,
-                    is_active: document.getElementById('is_active').checked
+                    is_active: document.getElementById('is_active').checked,
+                    group_ids: selectedGroupIds
                 };
 
                 // Convert empty professor_id to null

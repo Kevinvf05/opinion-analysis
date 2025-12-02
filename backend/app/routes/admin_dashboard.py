@@ -581,7 +581,24 @@ def delete_user(current_user, user_id):
         user_name = f"{user.first_name} {user.last_name}"
         user_role = user.role
         
-        # Delete user (CASCADE will delete related records)
+        # Explicitly delete role-specific records first to avoid FK constraint issues
+        if user.role == 'student':
+            student = Student.query.filter_by(user_id=user_id).first()
+            if student:
+                print(f"Deleting student record: {student.matricula}")
+                db.session.delete(student)
+        elif user.role == 'professor':
+            professor = Professor.query.filter_by(user_id=user_id).first()
+            if professor:
+                print(f"Deleting professor record: {professor.email}")
+                db.session.delete(professor)
+        elif user.role == 'admin':
+            admin = Admin.query.filter_by(user_id=user_id).first()
+            if admin:
+                print(f"Deleting admin record: {admin.id}")
+                db.session.delete(admin)
+        
+        # Now delete the user
         db.session.delete(user)
         db.session.commit()
         
@@ -683,6 +700,24 @@ def create_subject(current_user):
         db.session.add(new_subject)
         db.session.commit()
         
+        # Assign subject to existing groups if provided
+        group_ids = data.get('group_ids', [])
+        updated_groups = []
+        
+        if group_ids:
+            for group_id in group_ids:
+                try:
+                    group = GroupClass.query.get(group_id)
+                    if group:
+                        group.subject_id = new_subject.id
+                        updated_groups.append(group.group_name)
+                except Exception as group_error:
+                    print(f"Error assigning group {group_id}: {str(group_error)}")
+            
+            if updated_groups:
+                db.session.commit()
+                print(f"Assigned subject to {len(updated_groups)} groups")
+        
         print(f"Subject created successfully: {new_subject.code}")
         
         # Log activity
@@ -710,6 +745,143 @@ def create_subject(current_user):
     except Exception as e:
         db.session.rollback()
         print(f"Create subject error: {str(e)}")
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+
+
+@admin_bp.route('/subjects/<int:subject_id>', methods=['PUT'])
+@token_required
+def update_subject(current_user, subject_id):
+    """Update a subject (mainly for assigning/unassigning professors)"""
+    try:
+        if current_user.role != 'admin':
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        subject = Subject.query.get(subject_id)
+        if not subject:
+            return jsonify({'error': 'Subject not found'}), 404
+        
+        data = request.get_json()
+        print(f"Updating subject {subject_id} with data: {data}")
+        
+        # If assigning a professor, validate the professor exists and is active
+        if 'professor_id' in data:
+            if data['professor_id'] is not None:
+                professor = Professor.query.get(data['professor_id'])
+                if not professor:
+                    return jsonify({'error': 'Professor not found'}), 404
+                
+                # Allow assignment to inactive professors (removed is_active check)
+                subject.professor_id = data['professor_id']
+            else:
+                # Unassign professor
+                subject.professor_id = None
+        
+        # Update other fields if provided
+        if 'name' in data:
+            subject.name = data['name']
+        if 'code' in data:
+            # Check if new code conflicts with existing subjects
+            existing = Subject.query.filter_by(code=data['code']).first()
+            if existing and existing.id != subject_id:
+                return jsonify({'error': 'Subject code already exists'}), 400
+            subject.code = data['code']
+        if 'semester' in data:
+            subject.semester = data['semester']
+        if 'is_active' in data:
+            subject.is_active = data['is_active']
+        
+        db.session.commit()
+        
+        print(f"Subject updated successfully: {subject.code}")
+        
+        # Log activity
+        log = ActivityLog(
+            user_id=current_user.id,
+            user_type='admin',
+            action_type='subject_updated',
+            description=f'Updated subject: {subject.code} - {subject.name}'
+        )
+        db.session.add(log)
+        db.session.commit()
+        
+        # Get updated professor info
+        professor_name = None
+        if subject.professor_id:
+            professor = Professor.query.get(subject.professor_id)
+            if professor:
+                prof_user = User.query.get(professor.user_id)
+                professor_name = f"{prof_user.first_name} {prof_user.last_name}" if prof_user else None
+        
+        return jsonify({
+            'message': 'Subject updated successfully',
+            'subject': {
+                'id': subject.id,
+                'name': subject.name,
+                'code': subject.code,
+                'professor_id': subject.professor_id,
+                'professor_name': professor_name,
+                'semester': subject.semester,
+                'is_active': subject.is_active
+            }
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Update subject error: {str(e)}")
+        return jsonify({'error': f'Internal server error: {str(e)}'}), 500
+
+
+@admin_bp.route('/subjects/<int:subject_id>', methods=['DELETE'])
+@token_required
+def delete_subject(current_user, subject_id):
+    """Delete a subject and unbind all relationships"""
+    try:
+        if current_user.role != 'admin':
+            return jsonify({'error': 'Unauthorized'}), 403
+        
+        subject = Subject.query.get(subject_id)
+        if not subject:
+            return jsonify({'error': 'Subject not found'}), 404
+        
+        subject_code = subject.code
+        subject_name = subject.name
+        
+        # Unbind groups from this subject (set subject_id to NULL)
+        groups = GroupClass.query.filter_by(subject_id=subject_id).all()
+        groups_count = len(groups)
+        for group in groups:
+            group.subject_id = None
+        
+        # Unbind surveys from this subject (delete surveys for this subject)
+        # This will cascade delete related comments
+        surveys = Survey.query.filter_by(subject_id=subject_id).all()
+        surveys_count = len(surveys)
+        for survey in surveys:
+            db.session.delete(survey)
+        
+        # Delete the subject itself
+        db.session.delete(subject)
+        db.session.commit()
+        
+        # Log the activity
+        log = ActivityLog(
+            user_id=current_user.id,
+            user_type='admin',
+            action_type='subject_deleted',
+            description=f'Deleted subject: {subject_code} - {subject_name} (unbound from {groups_count} group(s), deleted {surveys_count} survey(s))'
+        )
+        db.session.add(log)
+        db.session.commit()
+        
+        return jsonify({
+            'message': 'Subject deleted successfully',
+            'groups_unbound': groups_count,
+            'surveys_deleted': surveys_count
+        }), 200
+        
+    except Exception as e:
+        db.session.rollback()
+        print(f"Delete subject error: {str(e)}")
         return jsonify({'error': f'Internal server error: {str(e)}'}), 500
 
 
@@ -770,35 +942,36 @@ def create_group(current_user):
         data = request.get_json()
         print(f"Creating group with data: {data}")
         
-        # Validate required fields
-        required_fields = ['subject_id', 'professor_id', 'group_name', 'semester_period']
+        # Validate required fields (only group_name and semester_period are required)
+        required_fields = ['group_name', 'semester_period']
         for field in required_fields:
             if field not in data or not data[field]:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
         
-        # Validate subject exists
-        subject = Subject.query.get(data['subject_id'])
-        if not subject:
-            return jsonify({'error': 'Subject not found'}), 404
+        # Validate subject exists if provided
+        if data.get('subject_id'):
+            subject = Subject.query.get(data['subject_id'])
+            if not subject:
+                return jsonify({'error': 'Subject not found'}), 404
         
-        # Validate professor exists
-        professor = Professor.query.get(data['professor_id'])
-        if not professor:
-            return jsonify({'error': 'Professor not found'}), 404
+        # Validate professor exists if provided
+        if data.get('professor_id'):
+            professor = Professor.query.get(data['professor_id'])
+            if not professor:
+                return jsonify({'error': 'Professor not found'}), 404
         
-        # Check if group already exists (subject + group_name + semester_period is unique)
+        # Check if group already exists (group_name + semester_period should be unique)
         existing_group = GroupClass.query.filter_by(
-            subject_id=data['subject_id'],
             group_name=data['group_name'],
             semester_period=data['semester_period']
         ).first()
         if existing_group:
-            return jsonify({'error': 'Group already exists for this subject and semester'}), 400
+            return jsonify({'error': 'Group with this name already exists for this semester'}), 400
         
         # Create new group
         new_group = GroupClass(
-            subject_id=data['subject_id'],
-            professor_id=data['professor_id'],
+            subject_id=data.get('subject_id'),  # Can be null
+            professor_id=data.get('professor_id'),  # Can be null
             group_name=data['group_name'],
             semester_period=data['semester_period'],
             schedule=data.get('schedule'),
@@ -810,6 +983,22 @@ def create_group(current_user):
         
         db.session.add(new_group)
         db.session.commit()
+        
+        # Add students to group if provided
+        student_ids = data.get('student_ids', [])
+        if student_ids:
+            from app.models import Student
+            for student_id in student_ids:
+                # Validate student exists
+                student = Student.query.get(student_id)
+                if student:
+                    # Insert into student_groups junction table
+                    db.session.execute(
+                        'INSERT INTO student_groups (student_id, group_id) VALUES (:student_id, :group_id)',
+                        {'student_id': student_id, 'group_id': new_group.id}
+                    )
+            db.session.commit()
+            print(f"Added {len(student_ids)} students to group {new_group.group_name}")
         
         print(f"Group created successfully: {new_group.group_name}")
         

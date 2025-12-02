@@ -1,0 +1,60 @@
+services:
+  # PostgreSQL Database with embedded schema and seed data
+  db:
+    image: axldm09/uaem-database:latest
+    container_name: uaem_db
+    environment:
+      POSTGRES_DB: uaem
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: Password123
+    ports:
+      - "5430:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - uaem_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d uaem"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Flask Backend API
+  backend:
+    image: axldm09/uaem-backend:latest
+    container_name: uaem_backend
+    environment:
+      FLASK_APP: run.py
+      FLASK_ENV: production
+      DATABASE_URL: postgresql://admin:Password123@db:5432/uaem
+      SECRET_KEY: change-this-to-a-random-secret-key-in-production
+      PYTHONUNBUFFERED: 1
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - uaem_network
+    restart: unless-stopped
+
+  # Frontend Nginx Server
+  frontend:
+    image: axldm09/uaem-frontend:latest
+    container_name: uaem_frontend
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - uaem_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  uaem_network:
+    driver: bridge

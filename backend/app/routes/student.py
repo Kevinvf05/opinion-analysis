@@ -6,31 +6,18 @@ from flask import Blueprint, request, jsonify
 from ..models import db, User, Student, Survey, Comment, Professor, Subject
 from ..routes import token_required
 from datetime import datetime
-from textblob import TextBlob
+from ..utils.sentiment_classifier import classify_comment
 
 student_bp = Blueprint('student', __name__, url_prefix='/api/student')
 
 
 def analyze_sentiment(text):
     """
-    Analyze sentiment of text using TextBlob
+    Analyze sentiment of text using BETO fine-tuned model
     Returns sentiment (positive/neutral/negative) and confidence score
     """
     try:
-        blob = TextBlob(text)
-        polarity = blob.sentiment.polarity
-        
-        # Determine sentiment based on polarity
-        if polarity > 0.1:
-            sentiment = 'positive'
-        elif polarity < -0.1:
-            sentiment = 'negative'
-        else:
-            sentiment = 'neutral'
-        
-        # Confidence is absolute value of polarity (0-1 scale)
-        confidence = abs(polarity)
-        
+        sentiment, confidence = classify_comment(text)
         return sentiment, confidence
     except Exception as e:
         print(f"Sentiment analysis error: {str(e)}")

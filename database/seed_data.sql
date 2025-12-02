@@ -12,7 +12,7 @@ WITH admin_user AS (
   INSERT INTO users (email, password_hash, first_name, last_name, role, is_active, last_login)
   VALUES (
     'admin@uaem.mx',
-    '6ca13d52ca70c883e0f0bb101e425a89e8624de51db2d2392593af6a84118090',  -- SHA256 of 'Admin123!'
+    '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',  -- SHA256 of 'admin123'
     'System', 'Admin', 'admin', TRUE, NOW()
   )
   RETURNING id
@@ -22,7 +22,7 @@ prof_user AS (
   INSERT INTO users (email, password_hash, first_name, last_name, role, is_active)
   VALUES (
     'alberto.garcia@uaem.mx',
-    '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  -- SHA256 of 'Prof123!'
+    'cffa965d9faa1d453f2d336294b029a7f84f485f75ce2a2c723065453b12b03b',  -- SHA256 of 'profesor123'
     'Alberto', 'Garcia', 'professor', TRUE
   )
   RETURNING id
@@ -32,7 +32,7 @@ prof2_user AS (
   INSERT INTO users (email, password_hash, first_name, last_name, role, is_active)
   VALUES (
     'maria.lopez@uaem.mx',
-    '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92',  -- SHA256 of 'Prof123!'
+    'cffa965d9faa1d453f2d336294b029a7f84f485f75ce2a2c723065453b12b03b',  -- SHA256 of 'profesor123'
     'Maria', 'Lopez', 'professor', TRUE
   )
   RETURNING id
@@ -42,7 +42,7 @@ stud_user AS (
   INSERT INTO users (email, password_hash, first_name, last_name, role, matricula, is_active)
   VALUES (
     NULL,
-    'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',  -- SHA256 of empty string
+    '2e63a1090735f47213fea3b974418e3e42437325f313b3d3d2f6238cc22298f9',  -- SHA256 of 'estudiante123'
     'Juan', 'Perez', 'student', 'A01700001', TRUE
   )
   RETURNING id
@@ -52,7 +52,7 @@ stud2_user AS (
   INSERT INTO users (email, password_hash, first_name, last_name, role, matricula, is_active)
   VALUES (
     NULL,
-    'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',  -- SHA256 of empty string
+    '2e63a1090735f47213fea3b974418e3e42437325f313b3d3d2f6238cc22298f9',  -- SHA256 of 'estudiante123'
     'Ana', 'Ruiz', 'student', 'A01700002', TRUE
   )
   RETURNING id
@@ -139,62 +139,168 @@ grp3 AS (
 -- Final SELECT to complete the CTE chain
 SELECT 1;
 
+COMMIT;
+
 -- ---------- 7) Enrollment (student_subjects) ----------
 INSERT INTO student_subjects (student_id, subject_id)
-SELECT st.id, s.id FROM stud_row st, subj_cs s
+SELECT s.id, subj.id 
+FROM students s, subjects subj 
+WHERE s.matricula = 'A01700001' AND subj.code = 'CS101'
 UNION ALL
-SELECT st.id, s.id FROM stud_row st, subj_stats s
+SELECT s.id, subj.id 
+FROM students s, subjects subj 
+WHERE s.matricula = 'A01700001' AND subj.code = 'MA150'
 UNION ALL
-SELECT st2.id, s.id FROM stud2_row st2, subj_ml s;
+SELECT s.id, subj.id 
+FROM students s, subjects subj 
+WHERE s.matricula = 'A01700002' AND subj.code = 'CS201';
 
 -- ---------- 8) Surveys (note: surveys.student_id & professor_id reference users.id) ----------
--- Juan Perez evaluates Prof. Alberto Garcia for CS101
+-- Survey 1: Juan Perez evaluates Prof. Alberto Garcia for CS101
 INSERT INTO surveys (student_id, professor_id, subject_id, status, created_at)
 SELECT 
-  (SELECT user_id FROM stud_row LIMIT 1), 
-  (SELECT user_id FROM prof_row LIMIT 1), 
-  (SELECT id FROM subj_cs LIMIT 1), 
-  'completed', NOW();
+  u1.id, 
+  u2.id, 
+  subj.id, 
+  'completed', 
+  NOW() - INTERVAL '5 days'
+FROM users u1, users u2, subjects subj
+WHERE u1.matricula = 'A01700001' 
+  AND u2.email = 'alberto.garcia@uaem.mx'
+  AND subj.code = 'CS101';
 
--- ---------- 9) Comments on survey ----------
+-- Survey 2: Ana Ruiz evaluates Prof. Alberto Garcia for CS201
+INSERT INTO surveys (student_id, professor_id, subject_id, status, created_at)
+SELECT 
+  u1.id, 
+  u2.id, 
+  subj.id, 
+  'completed', 
+  NOW() - INTERVAL '3 days'
+FROM users u1, users u2, subjects subj
+WHERE u1.matricula = 'A01700002' 
+  AND u2.email = 'alberto.garcia@uaem.mx'
+  AND subj.code = 'CS201';
+
+-- Survey 3: Juan Perez evaluates Prof. Maria Lopez for MA150
+INSERT INTO surveys (student_id, professor_id, subject_id, status, created_at)
+SELECT 
+  u1.id, 
+  u2.id, 
+  subj.id, 
+  'completed', 
+  NOW() - INTERVAL '2 days'
+FROM users u1, users u2, subjects subj
+WHERE u1.matricula = 'A01700001' 
+  AND u2.email = 'maria.lopez@uaem.mx'
+  AND subj.code = 'MA150';
+
+-- Survey 4: Ana Ruiz evaluates Prof. Maria Lopez for MA150
+INSERT INTO surveys (student_id, professor_id, subject_id, status, created_at)
+SELECT 
+  u1.id, 
+  u2.id, 
+  subj.id, 
+  'completed', 
+  NOW() - INTERVAL '1 day'
+FROM users u1, users u2, subjects subj
+WHERE u1.matricula = 'A01700002' 
+  AND u2.email = 'maria.lopez@uaem.mx'
+  AND subj.code = 'MA150';
+
+-- ---------- 9) Comments on surveys ----------
+-- POSITIVE comments for Alberto Garcia (CS101)
 INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
-SELECT id, 'Great introduction, clear explanations and helpful labs.', 'positive', 0.94, NOW()
-FROM surveys WHERE status = 'completed' LIMIT 1;
+SELECT 1, 'El profesor explica muy bien los conceptos y siempre está dispuesto a ayudar. Las clases son dinámicas y el material es excelente.', 'positive', 0.94, NOW() - INTERVAL '5 days';
+
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 1, 'Excelente dominio de la materia. Los ejemplos prácticos ayudan mucho a entender la teoría. Muy recomendado.', 'positive', 0.91, NOW() - INTERVAL '5 days';
+
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 1, 'Me gusta cómo hace las clases interactivas, siempre aprendes algo nuevo y útil. Gran profesor.', 'positive', 0.88, NOW() - INTERVAL '5 days';
+
+-- NEUTRAL comments for Alberto Garcia (CS201)
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 2, 'La materia es interesante pero a veces el ritmo es muy rápido. Sería bueno tener más tiempo para practicar en clase.', 'neutral', 0.78, NOW() - INTERVAL '3 days';
+
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 2, 'El contenido está bien pero las explicaciones podrían ser más detalladas. Las tareas son muy demandantes.', 'neutral', 0.72, NOW() - INTERVAL '3 days';
+
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 2, 'Regular. Algunos temas son confusos y no siempre hay tiempo para resolver todas las dudas. Podría mejorar.', 'neutral', 0.65, NOW() - INTERVAL '3 days';
+
+-- NEGATIVE comment for Alberto Garcia (CS201)
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 2, 'Las clases son demasiado rápidas y no explica bien los conceptos difíciles. Me cuesta seguir el ritmo y hay poca retroalimentación.', 'negative', 0.85, NOW() - INTERVAL '3 days';
+
+-- POSITIVE comments for Maria Lopez (MA150)
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 3, 'Profesora muy dedicada y paciente. Explica los conceptos matemáticos de forma clara y accesible. Excelente maestra.', 'positive', 0.96, NOW() - INTERVAL '2 days';
+
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 3, 'Me encanta su metodología de enseñanza. Siempre disponible para resolver dudas y los ejemplos son muy útiles.', 'positive', 0.93, NOW() - INTERVAL '2 days';
+
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 3, 'Hace que las matemáticas sean menos intimidantes. Sus explicaciones son claras y bien estructuradas.', 'positive', 0.89, NOW() - INTERVAL '2 days';
+
+-- NEUTRAL comment for Maria Lopez (MA150)
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 3, 'Buena profesora en general, aunque a veces los ejercicios en clase son repetitivos. Podría variar más los ejemplos.', 'neutral', 0.70, NOW() - INTERVAL '2 days';
+
+-- Additional comments for Maria Lopez from Ana Ruiz (Survey 4)
+-- POSITIVE comment
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 4, 'La profesora López es muy buena explicando. Me ayudó a mejorar mis calificaciones en matemáticas.', 'positive', 0.92, NOW() - INTERVAL '1 day';
+
+-- NEUTRAL comment
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 4, 'Las clases están bien organizadas pero a veces siento que falta más práctica con problemas complejos.', 'neutral', 0.68, NOW() - INTERVAL '1 day';
+
+-- NEGATIVE comment
+INSERT INTO comments (survey_id, text, sentiment, confidence_score, created_at)
+SELECT 4, 'A veces es difícil entender los temas porque va muy rápido y no siempre responde las preguntas en clase.', 'negative', 0.82, NOW() - INTERVAL '1 day';
 
 -- ---------- 10) Evaluations (aggregated per professor) ----------
 -- Simple illustrative row (your app may compute this)
 INSERT INTO evaluations (professor_id, student_id, comment, sentiment, sentiment_score, average_score, total_score,
                          positive_count, neutral_count, negative_count, created_at)
 SELECT pr.id, 'A01700001', 'Overall strong teaching performance for CS101.', 'positive', 0.90, 4.6, 23, 5, 0, 1, NOW()
-FROM prof_row pr;
+FROM professors pr
+WHERE pr.email = 'alberto.garcia@uaem.mx';
 
 -- ---------- 11) Subject Ratings (per subject & professor) ----------
 INSERT INTO subject_ratings (professor_id, subject_id, average_score, total_evaluations,
                              score_5_count, score_4_count, score_3_count, score_2_count, score_1_count,
                              positive_percentage, neutral_percentage, negative_percentage, last_updated)
 SELECT pr.id, s.id, 4.6, 6, 4, 2, 0, 0, 0, 85.0, 10.0, 5.0, NOW()
-FROM prof_row pr, subj_cs s;
+FROM professors pr, subjects s
+WHERE pr.email = 'alberto.garcia@uaem.mx' AND s.code = 'CS101';
 
 -- A second rating entry for a different subject/prof
 INSERT INTO subject_ratings (professor_id, subject_id, average_score, total_evaluations,
                              score_5_count, score_4_count, score_3_count, score_2_count, score_1_count,
                              positive_percentage, neutral_percentage, negative_percentage, last_updated)
 SELECT pr.id, s.id, 4.3, 4, 2, 2, 0, 0, 0, 75.0, 20.0, 5.0, NOW()
-FROM prof2_row pr, subj_stats s;
+FROM professors pr, subjects s
+WHERE pr.email = 'maria.lopez@uaem.mx' AND s.code = 'MA150';
 
 -- ---------- 12) Activity Logs ----------
 -- Admin creates professor and subjects
 INSERT INTO activity_logs (user_id, user_type, action_type, description, target_id, target_type, ip_address, user_agent, created_at)
-SELECT (SELECT user_id FROM admin_row LIMIT 1), 'admin', 'create', 'Created professor Alberto Garcia', (SELECT id FROM prof_row LIMIT 1), 'professor', '127.0.0.1', 'seed-script/1.0', NOW();
+SELECT u.id, 'admin', 'create', 'Created professor Alberto Garcia', pr.id, 'professor', '127.0.0.1', 'seed-script/1.0', NOW()
+FROM users u, professors pr
+WHERE u.email = 'admin@uaem.mx' AND pr.email = 'alberto.garcia@uaem.mx';
 
 INSERT INTO activity_logs (user_id, user_type, action_type, description, target_id, target_type, ip_address, user_agent, created_at)
-SELECT (SELECT user_id FROM admin_row LIMIT 1), 'admin', 'create', 'Created subject CS101', (SELECT id FROM subj_cs LIMIT 1), 'subject', '127.0.0.1', 'seed-script/1.0', NOW();
+SELECT u.id, 'admin', 'create', 'Created subject CS101', s.id, 'subject', '127.0.0.1', 'seed-script/1.0', NOW()
+FROM users u, subjects s
+WHERE u.email = 'admin@uaem.mx' AND s.code = 'CS101';
 
 -- Student completes survey
 INSERT INTO activity_logs (user_id, user_type, action_type, description, target_id, target_type, ip_address, user_agent, created_at)
-SELECT (SELECT user_id FROM stud_row LIMIT 1), 'student', 'complete_survey', 'Completed survey for CS101', (SELECT id FROM subj_cs LIMIT 1), 'subject', '127.0.0.1', 'seed-script/1.0', NOW();
-
-COMMIT;
+SELECT u.id, 'student', 'complete_survey', 'Completed survey for CS101', s.id, 'subject', '127.0.0.1', 'seed-script/1.0', NOW()
+FROM users u, subjects s
+WHERE u.matricula = 'A01700001' AND s.code = 'CS101';
 
 -- ============================================
 -- QUICK CHECKS (optional)

@@ -16,14 +16,14 @@
         .btn-pastel-gray:hover { background-color: #D0D0D0; }
     </style>
 </head>
-<body style="background-color: #89c2d9;">
+<body style="background-color: #e7e9ee;">
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
             <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
             <div class="flex items-center space-x-4">
-                <span class="text-xs sm:text-sm text-gray-600">Admin: Juan Pérez</span>
-                <button class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
+                <span id="adminName" class="text-xs sm:text-sm text-gray-600">Admin: Cargando...</span>
+                <button onclick="logout()" class="btn-pastel-red px-3 sm:px-4 py-2 rounded text-xs sm:text-sm font-semibold">
                     Cerrar Sesión
                 </button>
             </div>
@@ -43,6 +43,9 @@
                 <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
                     Profesores
                 </a>
+                <a href="admin-subjects.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Materias
+                </a>
                 <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
                     Crear Usuario
                 </a>
@@ -58,7 +61,7 @@
 
     <!-- Main Content -->
     <main class="p-4 sm:p-6 max-w-3xl mx-auto">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Crear Nuevo Usuario</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">Crear Nuevo Usuario</h1>
 
         <div class="bg-white rounded-lg shadow-lg p-4 sm:p-8">
             <form id="createUserForm" onsubmit="handleSubmit(event)">
@@ -592,6 +595,13 @@
         // Replace original handleSubmit
         const originalHandleSubmit = handleSubmit;
         handleSubmit = handleSubmitWithBackend;
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
 
         // Check auth on page load
         document.addEventListener('DOMContentLoaded', () => {

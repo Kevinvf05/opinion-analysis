@@ -600,6 +600,39 @@ const AdminAPI = {
         }
     },
     
+    async updateSubject(subjectId, subjectData) {
+        try {
+            const token = getToken();
+            if (!token) {
+                throw new Error('No authentication token found');
+            }
+            
+            console.log(`Updating subject ${subjectId} with data:`, subjectData);
+            const response = await fetch(`${API_BASE_URL}/admin/subjects/${subjectId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(subjectData)
+            });
+            
+            console.log('Update subject response status:', response.status);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `HTTP error ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('Subject updated:', data);
+            return data;
+        } catch (error) {
+            console.error('Error updating subject:', error);
+            throw error;
+        }
+    },
+    
     async createGroup(groupData) {
         try {
             const token = getToken();

@@ -15,7 +15,7 @@
         .btn-pastel-red:hover { background-color: #FFA0A0; }
     </style>
 </head>
-<body style="background-color: #89c2d9;">
+<body style="background-color: #e7e9ee;">
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
@@ -48,7 +48,7 @@
 
     <!-- Main Content -->
     <main class="p-4 sm:p-6 max-w-5xl mx-auto">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Mi Perfil</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">Mi Perfil</h1>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <!-- Profile Card -->
@@ -413,12 +413,6 @@
                 errorDiv.textContent = error.message || 'Error al cambiar la contraseña';
                 errorDiv.classList.remove('hidden');
             }
-        }
-    </script>
-            
-            setTimeout(() => {
-                successDiv.classList.add('hidden');
-            }, 3000);
         }
     </script>
 </body>

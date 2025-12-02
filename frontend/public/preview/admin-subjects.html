@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestionar Materias - Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body style="background-color: #e7e9ee;">
+    <!-- Header -->
+    <header class="bg-white shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
+            <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
+            <div class="flex items-center space-x-4">
+                <span id="adminName" class="text-xs sm:text-sm text-gray-600">Admin: Cargando...</span>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white shadow-md overflow-x-auto">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6">
+            <div class="flex space-x-4 sm:space-x-8 min-w-max">
+                <a href="admin-dashboard-preview.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Dashboard
+                </a>
+                <a href="admin-users.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Gestionar Usuarios
+                </a>
+                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Profesores
+                </a>
+                <a href="admin-subjects.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold whitespace-nowrap text-sm sm:text-base">
+                    Materias
+                </a>
+                <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Usuario
+                </a>
+                <a href="admin-create-subject.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Materia
+                </a>
+                <a href="admin-create-group.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Crear Grupo
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="p-4 sm:p-6 w-full max-w-[1800px] mx-auto">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Gestión de Materias</h1>
+            <button onclick="window.location.href='admin-create-subject.html'" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition">
+                + Agregar Materia
+            </button>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+            <!-- Subjects Table -->
+            <div class="xl:col-span-3 bg-white rounded-lg shadow-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">Código</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 30%;">Nombre</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider hidden sm:table-cell" style="width: 25%;">Profesor</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">Semestre</th>
+                                <th class="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider" style="width: 15%;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTable" class="bg-white divide-y divide-gray-200">
+                            <!-- Subjects will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Subject Preview Panel -->
+            <div id="subjectPreview" class="hidden xl:block xl:col-span-1 bg-white rounded-lg shadow-lg p-6 h-fit sticky top-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Detalles de la Materia</h3>
+                <p class="text-gray-500 text-center py-8">Selecciona una materia para ver sus detalles</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+        <div class="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+            <div class="mt-3">
+                <div class="flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mx-auto">
+                    <svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mt-4 text-center">Confirmar Eliminación</h3>
+                <p class="text-sm text-gray-500 mt-2 text-center" id="deleteMessage">
+                    ¿Está seguro que desea eliminar esta materia?
+                </p>
+                <div class="flex gap-4 mt-6">
+                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400">
+                        Cancelar
+                    </button>
+                    <button onclick="confirmDelete()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Include API files -->
+    <script src="/js/admin-api.js?v=20251125"></script>
+    
+    <script>
+        let subjects = [];
+        let subjectToDelete = null;
+
+        // Load subjects from backend
+        async function loadSubjects() {
+            try {
+                console.log('Loading subjects from database...');
+                
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                
+                const apiUrl = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : '/api';
+                
+                const response = await fetch(`${apiUrl}/admin/subjects`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to fetch subjects');
+                }
+                
+                const data = await response.json();
+                subjects = data.subjects || [];
+                console.log('Subjects loaded successfully:', subjects.length);
+                
+                renderSubjects();
+            } catch (error) {
+                console.error('Error loading subjects:', error);
+                alert('Error al cargar materias: ' + error.message);
+            }
+        }
+
+        // Render subjects table
+        function renderSubjects() {
+            const tbody = document.getElementById('subjectsTable');
+            
+            if (subjects.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                            No hay materias registradas
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = subjects.map(subject => `
+                <tr class="hover:bg-gray-50 cursor-pointer" onclick="showPreview(${subject.id})">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        ${subject.code}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-900">
+                        ${subject.name}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 hidden sm:table-cell">
+                        ${subject.professor_name || '<span class="text-gray-400 italic">Sin asignar</span>'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${subject.semester || '-'}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="event.stopPropagation(); deleteSubject(${subject.id})" 
+                                class="text-red-600 hover:text-red-900 font-medium">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Show subject preview
+        function showPreview(id) {
+            const subject = subjects.find(s => s.id === id);
+            if (!subject) return;
+            
+            const previewDiv = document.getElementById('subjectPreview');
+            previewDiv.innerHTML = `
+                <h3 class="text-xl font-bold text-gray-800 mb-4">Detalles de la Materia</h3>
+                <div class="space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-500">Código</p>
+                        <p class="font-semibold text-gray-900">${subject.code}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Nombre</p>
+                        <p class="font-semibold text-gray-900">${subject.name}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Profesor Asignado</p>
+                        <p class="font-semibold text-gray-900">${subject.professor_name || '<span class="text-gray-400 italic">Sin asignar</span>'}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Semestre</p>
+                        <p class="font-semibold text-gray-900">${subject.semester || '-'}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Grupos</p>
+                        <p class="font-semibold text-gray-900">${subject.groups_count || 0}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500">Estado</p>
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subject.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${subject.is_active ? 'Activa' : 'Inactiva'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            previewDiv.classList.remove('hidden');
+        }
+
+        // Delete subject
+        function deleteSubject(id) {
+            const subject = subjects.find(s => s.id === id);
+            if (!subject) return;
+            
+            subjectToDelete = id;
+            document.getElementById('deleteMessage').textContent = 
+                `¿Está seguro que desea eliminar la materia "${subject.code} - ${subject.name}"?`;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        }
+
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').classList.add('hidden');
+            subjectToDelete = null;
+        }
+
+        async function confirmDelete() {
+            if (!subjectToDelete) return;
+            
+            try {
+                const token = localStorage.getItem('authToken');
+                if (!token) {
+                    throw new Error('No authentication token found');
+                }
+                
+                const apiUrl = (typeof API_BASE_URL !== 'undefined') ? API_BASE_URL : '/api';
+                
+                const response = await fetch(`${apiUrl}/admin/subjects/${subjectToDelete}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Failed to delete subject');
+                }
+                
+                closeDeleteModal();
+                document.getElementById('subjectPreview').innerHTML = `
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">Detalles de la Materia</h3>
+                    <p class="text-gray-500 text-center py-8">Selecciona una materia para ver sus detalles</p>
+                `;
+                document.getElementById('subjectPreview').classList.add('hidden');
+                
+                await loadSubjects();
+                alert('Materia eliminada exitosamente');
+            } catch (error) {
+                console.error('Error deleting subject:', error);
+                alert('Error al eliminar materia: ' + error.message);
+                closeDeleteModal();
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
+        // Load subjects on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
+            if (currentUser.first_name && currentUser.last_name) {
+                document.getElementById('adminName').textContent = `Admin: ${currentUser.first_name} ${currentUser.last_name}`;
+            }
+            loadSubjects();
+        });
+    </script>
+</body>
+</html>

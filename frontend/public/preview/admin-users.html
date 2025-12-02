@@ -12,14 +12,14 @@
         .btn-pastel-red:hover { background-color: #FFA0A0; }
     </style>
 </head>
-<body style="background-color: #89c2d9;">
+<body style="background-color: #e7e9ee;">
     <!-- Header -->
     <header class="bg-white shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between items-center gap-2">
             <h1 class="text-xl sm:text-2xl font-bold text-gray-800 text-center sm:text-left">Sistema de Análisis de Opinión Docente</h1>
             <div class="flex items-center space-x-4">
-                <span class="text-xs sm:text-sm text-gray-600">Admin: Juan Pérez</span>
-                <button class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
+                <span id="adminName" class="text-xs sm:text-sm text-gray-600">Admin: Cargando...</span>
+                <button onclick="logout()" class="bg-red-500 hover:bg-red-600 text-white px-3 sm:px-4 py-2 rounded text-xs sm:text-sm">
                     Cerrar Sesión
                 </button>
             </div>
@@ -36,8 +36,11 @@
                 <a href="admin-users.html" class="py-4 px-2 border-b-2 border-blue-600 text-blue-600 font-semibold text-sm sm:text-base">
                     Gestionar Usuarios
                 </a>
-                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition text-sm sm:text-base">
+                <a href="admin-professors.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
                     Profesores
+                </a>
+                <a href="admin-subjects.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
+                    Materias
                 </a>
                 <a href="admin-create-user.html" class="py-4 px-2 border-b-2 border-transparent text-gray-600 hover:text-blue-600 hover:border-blue-600 font-semibold transition whitespace-nowrap text-sm sm:text-base">
                     Crear Usuario
@@ -54,7 +57,7 @@
 
     <!-- Main Content -->
     <main class="p-4 sm:p-6 w-full max-w-[1600px] mx-auto">
-        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-white">Gestión de Usuarios</h1>
+        <h1 class="text-2xl sm:text-3xl font-bold mb-6 text-gray-900">Gestión de Usuarios</h1>
 
         <!-- Filter Section -->
         <div class="bg-white p-4 rounded-lg shadow mb-6">
@@ -105,6 +108,110 @@
             <button class="px-3 sm:px-4 py-2 bg-white text-gray-700 rounded-lg shadow hover:bg-gray-100 transition text-sm">Siguiente</button>
         </div>
     </main>
+
+    <!-- Edit User Modal -->
+    <div id="editUserModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 overflow-y-auto">
+        <div class="bg-white rounded-lg shadow-xl p-6 sm:p-8 max-w-2xl w-full mx-4 my-8">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl sm:text-2xl font-bold text-blue-600">Editar Usuario</h2>
+                <button onclick="closeEditUserModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <form id="editUserForm" class="space-y-4">
+                <!-- Basic Information -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                        <input type="text" id="editFirstName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Apellido *</label>
+                        <input type="text" id="editLastName" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Email (only for professors and admins) -->
+                <div id="editEmailSection" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" id="editEmail" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                </div>
+
+                <!-- Matricula (only for students, read-only) -->
+                <div id="editMatriculaSection" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Matrícula</label>
+                    <input type="text" id="editMatricula" readonly class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed">
+                </div>
+
+                <!-- Password (optional) -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nueva Contraseña (dejar en blanco para no cambiar)</label>
+                    <input type="password" id="editPassword" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">Mínimo 6 caracteres</p>
+                </div>
+
+                <!-- Student-specific fields -->
+                <div id="editStudentFields" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Semestre</label>
+                            <input type="number" id="editSemester" min="1" max="10" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Grupo</label>
+                            <input type="text" id="editGroup" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Carrera</label>
+                        <input type="text" id="editCareer" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Professor-specific fields -->
+                <div id="editProfessorFields" class="hidden space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Departamento</label>
+                            <input type="text" id="editDepartment" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Oficina</label>
+                            <input type="text" id="editOffice" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Especialización</label>
+                        <input type="text" id="editSpecialization" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    </div>
+                </div>
+
+                <!-- Active Status -->
+                <div class="flex items-center space-x-2">
+                    <input type="checkbox" id="editIsActive" class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="editIsActive" class="text-sm font-medium text-gray-700">Usuario Activo</label>
+                </div>
+
+                <!-- Error Message -->
+                <div id="editUserError" class="hidden mt-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-lg text-sm">
+                    <strong>Error:</strong> <span id="editUserErrorText"></span>
+                </div>
+
+                <!-- Buttons -->
+                <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 pt-4">
+                    <button type="button" onclick="closeEditUserModal()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition text-sm sm:text-base">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Password Confirmation Modal for Admin Deletion -->
     <div id="adminDeleteModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -247,14 +354,208 @@
             await loadUsersFromBackend();
         }
 
+        let currentEditingUserId = null;
+
         function editUser(id) {
             const user = users.find(u => u.id === id);
-            if (!user) return;
+            if (!user) {
+                console.error('User not found:', id);
+                alert('Error: Usuario no encontrado');
+                return;
+            }
             
-            // For now, just show an alert
-            // In a real app, you'd open a modal with a form
-            alert(`Editar usuario ID: ${id}\nNombre: ${user.first_name} ${user.last_name}\n\n(Funcionalidad de edición completa próximamente)`);
+            console.log('Editing user:', user);
+            currentEditingUserId = id;
+            
+            // Populate basic fields
+            document.getElementById('editFirstName').value = user.first_name || '';
+            document.getElementById('editLastName').value = user.last_name || '';
+            document.getElementById('editPassword').value = '';
+            document.getElementById('editIsActive').checked = !!user.is_active;
+            
+            // Hide all role-specific sections first and clear email required
+            const emailInput = document.getElementById('editEmail');
+            emailInput.required = false;
+            document.getElementById('editEmailSection').classList.add('hidden');
+            document.getElementById('editMatriculaSection').classList.add('hidden');
+            document.getElementById('editStudentFields').classList.add('hidden');
+            document.getElementById('editProfessorFields').classList.add('hidden');
+            
+            // Show and populate role-specific fields
+            if (user.role === 'student') {
+                console.log('Loading student data:', {
+                    matricula: user.matricula,
+                    semester: user.semester,
+                    career: user.career,
+                    group: user.group
+                });
+                
+                // Show matricula (read-only)
+                document.getElementById('editMatriculaSection').classList.remove('hidden');
+                document.getElementById('editMatricula').value = user.matricula || 'N/A';
+                
+                // Show and populate student-specific fields
+                document.getElementById('editStudentFields').classList.remove('hidden');
+                document.getElementById('editSemester').value = user.semester !== undefined && user.semester !== null ? user.semester : '';
+                document.getElementById('editGroup').value = user.group || '';
+                document.getElementById('editCareer').value = user.career || '';
+                
+            } else if (user.role === 'professor' || user.role === 'admin') {
+                console.log('Loading professor/admin data:', {
+                    email: user.email,
+                    department: user.department,
+                    office: user.office,
+                    specialization: user.specialization
+                });
+                
+                // Show email field (required for professors and admins)
+                document.getElementById('editEmailSection').classList.remove('hidden');
+                emailInput.value = user.email || '';
+                emailInput.required = true;
+                
+                if (user.role === 'professor') {
+                    // Show and populate professor-specific fields
+                    document.getElementById('editProfessorFields').classList.remove('hidden');
+                    document.getElementById('editDepartment').value = user.department || '';
+                    document.getElementById('editOffice').value = user.office || '';
+                    document.getElementById('editSpecialization').value = user.specialization || '';
+                }
+            }
+            
+            // Hide error message
+            document.getElementById('editUserError').classList.add('hidden');
+            
+            // Show modal
+            document.getElementById('editUserModal').classList.remove('hidden');
         }
+
+        function closeEditUserModal() {
+            document.getElementById('editUserModal').classList.add('hidden');
+            currentEditingUserId = null;
+            document.getElementById('editUserForm').reset();
+        }
+
+        // Handle form submission
+        document.getElementById('editUserForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (!currentEditingUserId) {
+                console.error('No user ID selected for editing');
+                return;
+            }
+            
+            const user = users.find(u => u.id === currentEditingUserId);
+            if (!user) {
+                console.error('User not found:', currentEditingUserId);
+                return;
+            }
+            
+            const errorDiv = document.getElementById('editUserError');
+            const errorText = document.getElementById('editUserErrorText');
+            
+            try {
+                // Prepare update data
+                const updateData = {
+                    first_name: document.getElementById('editFirstName').value.trim(),
+                    last_name: document.getElementById('editLastName').value.trim(),
+                    is_active: document.getElementById('editIsActive').checked
+                };
+                
+                // Add password if provided
+                const password = document.getElementById('editPassword').value;
+                if (password) {
+                    if (password.length < 6) {
+                        errorText.textContent = 'La contraseña debe tener al menos 6 caracteres';
+                        errorDiv.classList.remove('hidden');
+                        return;
+                    }
+                    updateData.password = password;
+                }
+                
+                // Add role-specific fields
+                if (user.role === 'student') {
+                    const semester = document.getElementById('editSemester').value;
+                    const group = document.getElementById('editGroup').value.trim();
+                    const career = document.getElementById('editCareer').value.trim();
+                    
+                    // Always send student fields, even if empty (allows clearing values)
+                    if (semester) {
+                        updateData.semester = parseInt(semester);
+                    }
+                    if (group) {
+                        updateData.group = group;
+                    }
+                    if (career) {
+                        updateData.career = career;
+                    }
+                    
+                    console.log('Student update data:', {
+                        semester: updateData.semester,
+                        group: updateData.group,
+                        career: updateData.career
+                    });
+                    
+                } else if (user.role === 'professor' || user.role === 'admin') {
+                    const email = document.getElementById('editEmail').value.trim();
+                    if (!email) {
+                        errorText.textContent = 'El email es requerido';
+                        errorDiv.classList.remove('hidden');
+                        return;
+                    }
+                    updateData.email = email;
+                    
+                    if (user.role === 'professor') {
+                        const department = document.getElementById('editDepartment').value.trim();
+                        const office = document.getElementById('editOffice').value.trim();
+                        const specialization = document.getElementById('editSpecialization').value.trim();
+                        
+                        // Always send professor fields, even if empty (allows clearing values)
+                        if (department) {
+                            updateData.department = department;
+                        }
+                        if (office) {
+                            updateData.office = office;
+                        }
+                        if (specialization) {
+                            updateData.specialization = specialization;
+                        }
+                        
+                        console.log('Professor update data:', {
+                            department: updateData.department,
+                            office: updateData.office,
+                            specialization: updateData.specialization
+                        });
+                    }
+                }
+                
+                // Check if trying to deactivate the last admin
+                if (user.role === 'admin' && !updateData.is_active && user.is_active) {
+                    const activeAdmins = users.filter(u => u.role === 'admin' && u.is_active).length;
+                    if (activeAdmins <= 1) {
+                        errorText.textContent = 'No se puede desactivar al único administrador activo del sistema';
+                        errorDiv.classList.remove('hidden');
+                        return;
+                    }
+                }
+                
+                console.log('Sending update request for user:', currentEditingUserId, updateData);
+                
+                // Update via API
+                const response = await updateUser(currentEditingUserId, updateData);
+                console.log('Update response:', response);
+                
+                // Close modal and reload users
+                closeEditUserModal();
+                await loadUsersFromBackend();
+                
+                alert('Usuario actualizado exitosamente');
+                
+            } catch (error) {
+                console.error('Error updating user:', error);
+                errorText.textContent = error.message || 'Error desconocido al actualizar usuario';
+                errorDiv.classList.remove('hidden');
+            }
+        });
 
         async function toggleStatus(id) {
             const user = users.find(u => u.id === id);
@@ -349,6 +650,13 @@
             userToDelete = null;
         }
 
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('currentUser');
+            window.location.href = '/login.html';
+        }
+
         // Check auth and load users on page load
         document.addEventListener('DOMContentLoaded', async () => {
             // Check authentication
@@ -363,6 +671,9 @@
             
             try {
                 const currentUser = JSON.parse(currentUserStr);
+                
+                // Update admin name in header
+                document.getElementById('adminName').textContent = `Admin: ${currentUser.first_name} ${currentUser.last_name}`;
                 
                 if (currentUser.role !== 'admin') {
                     alert('Acceso denegado. Solo administradores pueden acceder a esta página.');

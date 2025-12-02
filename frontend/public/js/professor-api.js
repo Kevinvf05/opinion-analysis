@@ -195,11 +195,10 @@ const ProfessorAPI = {
 
     /**
      * Change professor password
-     * @param {string} currentPassword - Current password
-     * @param {string} newPassword - New password
+     * @param {Object} passwordData - Object with current_password and new_password
      * @returns {Promise<Object>} Success message
      */
-    async changePassword(currentPassword, newPassword) {
+    async changePassword(passwordData) {
         try {
             const token = getAuthToken();
             
@@ -207,16 +206,15 @@ const ProfessorAPI = {
                 throw new Error('Not authenticated');
             }
             
+            console.log('Changing password with data:', { current_password: '***', new_password: '***' });
+            
             const response = await fetch(`${API_BASE_URL}/professor/password`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({
-                    current_password: currentPassword,
-                    new_password: newPassword
-                })
+                body: JSON.stringify(passwordData)
             });
             
             if (!response.ok) {

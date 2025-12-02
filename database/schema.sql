@@ -109,7 +109,7 @@ CREATE INDEX idx_subjects_is_active ON subjects(is_active);
 -- ============================================
 CREATE TABLE group_classes (
     id SERIAL PRIMARY KEY,
-    subject_id INTEGER NOT NULL REFERENCES subjects(id) ON DELETE CASCADE,
+    subject_id INTEGER REFERENCES subjects(id) ON DELETE CASCADE,
     professor_id INTEGER NOT NULL REFERENCES professors(id) ON DELETE CASCADE,
     group_name VARCHAR(20) NOT NULL,
     semester_period VARCHAR(20) NOT NULL,

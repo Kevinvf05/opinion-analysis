@@ -65,7 +65,7 @@ def login():
             name = data.get('name')
             
             if not matricula or not name:
-                return jsonify({'error': 'Matricula and name are required'}), 400
+                return jsonify({'error': 'Matricula y nombre son requeridos'}), 400
             
             # Clean and normalize the input name (remove accents and special chars)
             import unicodedata
@@ -86,17 +86,17 @@ def login():
             user = User.query.filter_by(matricula=matricula.upper(), role='student').first()
             
             if not user:
-                return jsonify({'error': 'Student not found'}), 404
+                return jsonify({'error': 'No se encontró al estudiante'}), 404
             
             if not user.is_active:
-                return jsonify({'error': 'Account is inactive'}), 403
+                return jsonify({'error': 'La cuenta está inactiva'}), 403
             
             # For students, verify the name matches (normalize both for comparison)
             full_name_db = f"{user.first_name} {user.last_name}"
             full_name_db_cleaned = normalize_name(full_name_db)
             
             if name_cleaned != full_name_db_cleaned:
-                return jsonify({'error': 'Name does not match records'}), 401
+                return jsonify({'error': 'El nombre no coincide con los registros'}), 401
             
         else:
             # Staff login (professor, admin ONLY) with email and password
@@ -104,20 +104,20 @@ def login():
             password = data.get('password')
             
             if not email or not password:
-                return jsonify({'error': 'Email and password are required'}), 400
+                return jsonify({'error': 'Correo electrónico y contraseña son requeridos'}), 400
             
             # Find user by email (must be professor or admin, NOT student)
             user = User.query.filter_by(email=email.lower()).first()
             
             if not user or user.role not in ['professor', 'admin']:
-                return jsonify({'error': 'Invalid credentials'}), 401
+                return jsonify({'error': 'Credenciales inválidas'}), 401
             
             if not user.is_active:
-                return jsonify({'error': 'Account is inactive'}), 403
+                return jsonify({'error': 'La cuenta está inactiva'}), 403
             
             # Verify password
             if not user.check_password(password):
-                return jsonify({'error': 'Invalid credentials'}), 401
+                return jsonify({'error': 'Credenciales inválidas'}), 401
         
         # Update last login
         user.last_login = datetime.utcnow()
