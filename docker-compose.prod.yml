@@ -31,7 +31,7 @@ services:
       SECRET_KEY: change-this-to-a-random-secret-key-in-production
       PYTHONUNBUFFERED: 1
     ports:
-      - "5000:5000"
+      - "5003:5000"
     depends_on:
       db:
         condition: service_healthy
